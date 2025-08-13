@@ -257,7 +257,7 @@ class CustomLeRobotDataset(Dataset):
         if self.fix_sidx is not None and self.fix_mem_idx is not None:
             action_indexes = list(range(self.fix_sidx, self.fix_sidx+self.action_chunk))
             frame_indexes = action_indexes[::self.video_temporal_stride]
-            return self.fix_mem_idx + self.frame_indexes, self.fix_mem_idx + self.action_indexes
+            return self.fix_mem_idx + frame_indexes, self.fix_mem_idx + action_indexes
 
         chunk_end = random.randint(self.action_chunk, total_frames+self.action_chunk)
         indexes = np.array(list(range(chunk_end-self.sample_n_frames, chunk_end)))
@@ -476,6 +476,6 @@ class CustomLeRobotDataset(Dataset):
             video=video,
             actions=actions,
             caption=caption,
-            states=state,
+            state=state,
         )
         return sample
