@@ -1,0 +1,3 @@
+DomainTable = {
+    'agibotworld': 11
+}
