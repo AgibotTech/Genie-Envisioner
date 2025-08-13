@@ -36,7 +36,7 @@ This repo is the official implementation of Genie Envisioner: A Unified World Fo
 git clone https://github.com/AgibotTech/Genie-Envisioner.git
 conda create -n genie_envisioner python=3.10.4
 conda activate genie_envisioner
-pip install -r requirements
+pip install -r requirements.txt
 ```
 
 ### Training
