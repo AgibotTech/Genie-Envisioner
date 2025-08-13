@@ -78,7 +78,7 @@ class AgiBotWorld(Dataset):
         preprocess:               frame preprocessing strategy, resize or center_crop_resize
         valid_cam:                list of cam names 
         chunk:                    number of video frames to predict
-        action_chunk:             number of actions to predict, action_chunk should be 
+        action_chunk:            number of actions to predict, action_chunk should be an integer multiple of chunk.
         n_previous:               number of memory frames
         previous_pick_mode:       how to select memories
         random_crop:              randomly crop images

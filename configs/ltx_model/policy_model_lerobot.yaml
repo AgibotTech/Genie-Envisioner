@@ -118,6 +118,7 @@ diffusion_model:
     action_attention_head_dim: 32
 
 data:
+### more details can be found in data/utils/*_dataset.py
   train:
     data_roots: ["path/to/aidea-world-lerobot"]
     domains: ["agibotworld", ]
@@ -133,7 +134,6 @@ data:
     dataset_info_cache_path: "path/to/save/dataset_meta_info_cache/train"
     action_type: "delta"
     action_space: "joint"
-    # specific_tasks: [543, ]
   val:
     data_roots: ["path/to/aidea-world-lerobot"]
     domains: ["agibotworld", ]
@@ -149,7 +149,6 @@ data:
     dataset_info_cache_path: "path/to/save/dataset_meta_info_cache/val"
     action_type: "delta"
     action_space: "joint"
-    # specific_tasks: [543, ]
 
 use_color_jitter: true
 num_inference_step: 5
