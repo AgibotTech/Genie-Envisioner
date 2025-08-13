@@ -191,8 +191,8 @@ Predict actions and draw an open-loop verification diagram
 bash scripts/infer.sh main.py \
     configs/ltx_model/policy_model_lerobot.yaml \
     path/to/trained/checkpoint.safetensors \
-    path/to/save/outputs
-
+    path/to/save/outputs \
+    DATASETNAME
 ```
 
 
@@ -202,6 +202,7 @@ We provide a simple example of deploying GE-Act server based on [openpi](https:/
 
 ```
 # GE-Act server
+# modify $IP_ADDRESS_OF_SERVER to your ip address and modify $DOMAIN_NAME to DATASETNAME
 bash web_infer_scripts/run_server.sh
 
 # A simple client that send random observations

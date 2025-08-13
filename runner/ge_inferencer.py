@@ -384,7 +384,7 @@ class Inferencer:
                 plt.clf()
 
 
-    def infer(self, n_chunk_action=10, n_chunk_video=1, n_validation=10, global_step=0):
+    def infer(self, n_chunk_action=10, n_chunk_video=1, n_validation=10, global_step=0, domain_name="agibotworld"):
         model_save_dir = os.path.join(self.save_folder,f'Inference')
         self.validate(
             model_save_dir, global_step,
@@ -392,4 +392,5 @@ class Inferencer:
             n_chunk_video=n_chunk_video,
             n_chunk_action=n_chunk_action,
             n_validation=n_validation,
+            domain_name=domain_name,
         )

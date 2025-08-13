@@ -27,7 +27,7 @@ def get_args():
 
     parser.add_argument('-p', '--port', type=int, default=8001)
 
-    parser.add_argument('--task_name', type=str, default="agibotworld")
+    parser.add_argument('--domain_name', type=str, default="agibotworld")
 
     parser.add_argument("--add_state", action="store_true")
     
@@ -62,7 +62,7 @@ if __name__ == "__main__":
         transformer_file=args.weight,
         load_weights=True,
         threshold=args.threshold,
-        task_name=args.task_name,
+        domain_name=args.domain_name,
         num_inference_steps=args.denoise_step,
         action_dim=args.action_dim,
         gripper_dim=1,

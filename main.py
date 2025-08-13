@@ -17,6 +17,7 @@ def main():
     parser.add_argument('--n_validation', type=int, default=1, help='num of samples to predict, used in inference stage only')
     parser.add_argument('--n_chunk_action', type=int, default=1, help='num of action chunks to predict, used in action inference stage only')
     parser.add_argument('--output_path', type=str, default=None, help='Path to save outputs, used in inference stage only')
+    parser.add_argument('--domain_name', type=str, default="agibotworld", help='Domain name of the validation dataset, used in inference stage only')
 
     args = parser.parse_args()
     Runner = import_custom_class(
@@ -46,7 +47,8 @@ def main():
         runner.prepare_models()
         runner.infer(
             n_chunk_action=args.n_chunk_action,
-            n_validation=args.n_validation
+            n_validation=args.n_validation,
+            domain_name=args.domain_name
         )
 
     else:

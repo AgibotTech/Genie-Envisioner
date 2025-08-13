@@ -54,7 +54,7 @@ class MVActor:
         n_prev=4,
         action_dim=14,
         gripper_dim=1,
-        task_name="agibotworld",
+        domain_name="agibotworld",
         load_weights=True,
         num_inference_steps=None,
         device = torch.device("cuda:0"),
@@ -88,11 +88,11 @@ class MVActor:
         self.device = "cuda"
         self.prepare_models()
 
-        state_statistic_name = task_name + "_" + self.action_space
+        state_statistic_name = domain_name + "_" + "state" + "_" + self.action_space
         if self.action_type == "delta":
-            action_statistic_name = task_name + "_" + "delta" + "_" + self.action_space
+            action_statistic_name = domain_name + "_" + "delta" + "_" + self.action_space
         else:
-            action_statistic_name = task_name + "_" + self.action_space
+            action_statistic_name = domain_name + "_" + self.action_space
 
         ### (1,1,C)
         self.act_mean = torch.tensor(StatisticInfo[action_statistic_name]["mean"]).unsqueeze(0).unsqueeze(0)
@@ -111,8 +111,8 @@ class MVActor:
         if threshold is None:
             self.threshold = args.threshold
         else:
-            self.threshold = threshold  # TODO: important parameters to adjust
-
+            self.threshold = threshold
+            
         self.num_inference_steps = args.num_inference_steps
 
         self.reset()
