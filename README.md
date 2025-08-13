@@ -20,6 +20,14 @@ This repo is the official implementation of Genie Envisioner: A Unified World Fo
 
 - [2025.05.16] 🚀 [EWMB (Embodied World Model Benchmark)](https://github.com/AgibotTech/EWMBench) has been released.
 
+
+## TODO
+- [x] Release inference & training code
+- [ ] Release model weights
+- [ ] Support more backbone models
+
+
+
 ## Getting started
 
 ### Setup
@@ -35,7 +43,7 @@ pip install -r requirements
 
 #### GE-Act Post-Training
 
-1. Download the pretrained weights of [GE-base](https://huggingface.co) and the weights of tokenizer and vae used in LTX_Video from [HuggingFace](https://huggingface.co/Lightricks/LTX-Video/tree/main), and modify the model weight config in `configs/ltx_model/video_model.yaml`:
+1. Download the pretrained weights of [GE-base(Comming Soon)](https://huggingface.co) and the weights of tokenizer and vae used in LTX_Video from [HuggingFace](https://huggingface.co/Lightricks/LTX-Video/tree/main), and modify the model weight config in `configs/ltx_model/video_model.yaml`:
     ```
     pretrained_model_name_or_path: PATH/TO/PRETRAINED_WEIGHTS_OF_VAE_AND_TOKENIZER
     diffusion_model:
@@ -159,7 +167,7 @@ You can also train GE-base on your own database. Here, we take training on AgiBo
             dataset_info_cache_path: "path/to/save/dataset_meta_info_cache"
     ```
 
-3. Download the weights of tokenizer and vae used in LTX_Video from [HuggingFace](https://huggingface.co/Lightricks/LTX-Video/tree/main) and the pretrained weights of [GE](https://huggingface.co), and modify the model weight config in `configs/ltx_model/video_model.yaml`:
+3. Download the weights of tokenizer and vae used in LTX_Video from [HuggingFace](https://huggingface.co/Lightricks/LTX-Video/tree/main) and the pretrained weights of [GE-Base(Comming Soon)](https://huggingface.co), and modify the model weight config in `configs/ltx_model/video_model.yaml`:
     ```
     pretrained_model_name_or_path: PATH/TO/PRETRAINED_WEIGHTS_OF_VAE_AND_TOKENIZER
     diffusion_model:
@@ -196,13 +204,6 @@ bash web_infer_scripts/run_server.sh
 # A simple client that send random observations
 bash web_infer_scripts/run_simple_client.sh
 ```
-
-
-
-## TODO
-- [x] Release inference & training code
-- [] Release model weights
-- [] Support more backbone models
 
 
 ## Citation
