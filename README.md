@@ -136,6 +136,9 @@ pip install -r requirements
             ...
     ```
 
+    More details of dataset can be found in data/utils/*_dataset.py
+
+
 5. Enable action-model as bellow in `configs/ltx_model/policy_model_lerobot.yaml`:
     ```
     return_action: True
