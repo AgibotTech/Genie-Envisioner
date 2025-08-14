@@ -36,3 +36,4 @@ tensorboard
 deepspeed==0.15.3
 pyarrow==16.1.0
 fastparquet
+av
