@@ -45,11 +45,11 @@ pip install -r requirements.txt
 
 #### GE-Act Post-Training
 
-1. Download the pretrained weights of [GE-base](https://huggingface.co/agibot-world/Genie-Envisioner) and the weights of tokenizer and vae used in LTX_Video from [HuggingFace](https://huggingface.co/Lightricks/LTX-Video/tree/main), and modify the model weight config in `configs/ltx_model/video_model.yaml`:
+1. Download the pretrained weights of [GE-base](https://huggingface.co/agibot-world/Genie-Envisioner/blob/main/GE_base_fast_v0.1.safetensors) and the weights of tokenizer and vae used in LTX_Video from [HuggingFace](https://huggingface.co/Lightricks/LTX-Video/tree/main), and modify the model weight config in `configs/ltx_model/video_model.yaml`:
     ```
     pretrained_model_name_or_path: PATH/TO/PRETRAINED_WEIGHTS_OF_VAE_AND_TOKENIZER
     diffusion_model:
-    model_path: PATH/TO/GE-base-{version}.safetensors
+    model_path: PATH/TO/GE_base_{version}.safetensors
     ```
 
 2. Build your own LeRoBot dataset following the instruction in [LeRoBot](https://github.com/huggingface/lerobot) and [a conversion script of AgiBotWorld](https://github.com/OpenDriveLab/AgiBot-World/blob/main/scripts/convert_to_lerobot.py).
@@ -172,11 +172,11 @@ You can also train GE-base on your own database. Here, we take training on AgiBo
             dataset_info_cache_path: "path/to/save/dataset_meta_info_cache"
     ```
 
-3. Download the weights of tokenizer and vae used in LTX_Video from [HuggingFace](https://huggingface.co/Lightricks/LTX-Video/tree/main) and the pretrained weights of [GE-Base](https://huggingface.co/agibot-world/Genie-Envisioner), and modify the model weight config in `configs/ltx_model/video_model.yaml`:
+3. Download the weights of tokenizer and vae used in LTX_Video from [HuggingFace](https://huggingface.co/Lightricks/LTX-Video/tree/main) and the pretrained weights of [GE-Base](https://huggingface.co/agibot-world/Genie-Envisioner/blob/main/GE_base_fast_v0.1.safetensors), and modify the model weight config in `configs/ltx_model/video_model.yaml`:
     ```
     pretrained_model_name_or_path: PATH/TO/PRETRAINED_WEIGHTS_OF_VAE_AND_TOKENIZER
     diffusion_model:
-    model_path: PATH/TO/GE-base-{version}.safetensors
+    model_path: PATH/TO/GE_base_{version}.safetensors
     ```
 
 4. Pre-train Video-Model
