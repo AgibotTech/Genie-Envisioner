@@ -226,7 +226,7 @@ bash web_infer_scripts/run_simple_client.sh
 
 - The Genie-Envisioner team 🤗 for building Genie Envisioner [Paper](https://arxiv.org/abs/2508.05635).
 
-- The previous version EnerVerse of Genie-Envisioner. [Paper](https://arxiv.org/abs/2508.05635)
+- The previous version EnerVerse of Genie-Envisioner. [Paper](https://arxiv.org/abs/2501.01895)
 
 - The previous version EnerVerse-AC of GE-Sim. [Paper](https://arxiv.org/abs/2505.09723) [Github](https://github.com/AgibotTech/EnerVerse-AC)
 
