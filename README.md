@@ -14,6 +14,8 @@ This repo is the official implementation of Genie Envisioner: A Unified World Fo
 
 ## News
 
+- [2025.08.14] 🚀 Weights of [GE-Base](https://huggingface.co/agibot-world/Genie-Envisioner) has been released.
+
 - [2025.08.13] 🚀 Codes of Genie Envisioner has been released.
 
 - [2025.08.08] 📄 The technical report [Genie Envisioner: A Unified World Foundation Platform for Robotic Manipulation](https://arxiv.org/abs/2508.05635) has been released.
@@ -23,7 +25,7 @@ This repo is the official implementation of Genie Envisioner: A Unified World Fo
 
 ## TODO
 - [x] Release inference & training code
-- [ ] Release model weights
+- [x] Release model weights
 - [ ] Support more backbone models
 
 
@@ -43,7 +45,7 @@ pip install -r requirements.txt
 
 #### GE-Act Post-Training
 
-1. Download the pretrained weights of [GE-base(Comming Soon)](https://huggingface.co) and the weights of tokenizer and vae used in LTX_Video from [HuggingFace](https://huggingface.co/Lightricks/LTX-Video/tree/main), and modify the model weight config in `configs/ltx_model/video_model.yaml`:
+1. Download the pretrained weights of [GE-base](https://huggingface.co/agibot-world/Genie-Envisioner) and the weights of tokenizer and vae used in LTX_Video from [HuggingFace](https://huggingface.co/Lightricks/LTX-Video/tree/main), and modify the model weight config in `configs/ltx_model/video_model.yaml`:
     ```
     pretrained_model_name_or_path: PATH/TO/PRETRAINED_WEIGHTS_OF_VAE_AND_TOKENIZER
     diffusion_model:
@@ -170,7 +172,7 @@ You can also train GE-base on your own database. Here, we take training on AgiBo
             dataset_info_cache_path: "path/to/save/dataset_meta_info_cache"
     ```
 
-3. Download the weights of tokenizer and vae used in LTX_Video from [HuggingFace](https://huggingface.co/Lightricks/LTX-Video/tree/main) and the pretrained weights of [GE-Base(Comming Soon)](https://huggingface.co), and modify the model weight config in `configs/ltx_model/video_model.yaml`:
+3. Download the weights of tokenizer and vae used in LTX_Video from [HuggingFace](https://huggingface.co/Lightricks/LTX-Video/tree/main) and the pretrained weights of [GE-Base](https://huggingface.co/agibot-world/Genie-Envisioner), and modify the model weight config in `configs/ltx_model/video_model.yaml`:
     ```
     pretrained_model_name_or_path: PATH/TO/PRETRAINED_WEIGHTS_OF_VAE_AND_TOKENIZER
     diffusion_model:
@@ -211,7 +213,7 @@ bash web_infer_scripts/run_simple_client.sh
 
 
 ## Citation
-```
+```bib
 @article{liao2025genie,
   title={Genie Envisioner: A Unified World Foundation Platform for Robotic Manipulation},
   author={Liao, Yue and Zhou, Pengfei and Huang, Siyuan and Yang, Donglin and Chen, Shengcong and Jiang, Yuxin and Hu, Yue and Cai, Jingbin and Liu, Si and Luo, Jianlan, Chen Liliang, Yan Shuicheng, Yao Maoqing, Ren Guanghui},
