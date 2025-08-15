@@ -240,4 +240,6 @@ bash web_infer_scripts/run_simple_client.sh
 
 ## License
 
-All the data and code within this repo are under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+Codes in the directory ``models/ltx_models``, ``models/pipeline`` and ``web_infer_utils/openpi_client`` are modified from [Diffusers](https://github.com/huggingface/diffusers/), [LTX-Video](https://github.com/Lightricks/LTX-Video) and [openpi](https://github.com/Physical-Intelligence/openpi), which means these codes under [Apache License 2.0](https://github.com/huggingface/diffusers/blob/main/LICENSE).
+
+Other data and codes within this repo are under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
