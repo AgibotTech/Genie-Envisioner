@@ -601,7 +601,7 @@ class Trainer:
                             act_state = None
                             
 
-                        actions = batch['actions'].to(accelerator.device, dtype=weight_dtype).contiguous()   # shape b,t,c
+                        actions = batch['actions'][:, -self.args.data['train']['action_chunk']:].to(accelerator.device, dtype=weight_dtype).contiguous()   # shape b,t,c
                         action_dim = actions.shape[-1]
 
                         noise_actions = randn_tensor(actions.shape, device=accelerator.device, dtype=weight_dtype)
@@ -844,7 +844,7 @@ class Trainer:
         if self.args.return_action:
             # shape t, c
             if gt_actions is None:
-                gt_actions = batch['actions']
+                gt_actions = batch['actions'][:, -self.args.data['train']['action_chunk']:]
                 action_dim = gt_actions.shape[-1]
 
             action_logs = act_metric(
