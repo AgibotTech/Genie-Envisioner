@@ -457,7 +457,7 @@ class CustomLeRobotDataset(Dataset):
 
     def __getitem__(self, idx):        
         
-        video, actions, caption, state = self.get_batch(idx)
+        # video, actions, caption, state = self.get_batch(idx)
 
         if self.fix_epiidx is not None:
             video, actions, caption, state = self.get_batch(self.fix_epiidx)
