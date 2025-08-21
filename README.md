@@ -122,8 +122,42 @@ pip install -r requirements.txt
     }
     ```
 
-4. Modified the config in ``configs/ltx_model/policy_model_lerobot.yaml``:
+4. Task-specific video adaption
+    
+    As mentioned in our paper, although GE-base has zero-shot capability, for the unseen robots or customized new tasks, we recommend performing this step of video adaptation to achieve better performance.
+
+    1. Modify the config in ``configs/ltx_model/video_model_lerobot.yaml``. More details of dataset can be found in ``data/utils/*_dataset.py``:
     ```
+    data:
+        train / val:
+            data_roots:   [ROOT_PATH_TO_YOUR_DATASETS, ]
+            domains:      [DATASETNAME, ]
+            # rewrite to the camera names used in your dataset
+            valid_cam:    ["observation.images.top_head", "observation.images.hand_left", "observation.images.hand_right"]
+            ...
+    ```
+
+    2. Disable action-model as bellow in `configs/ltx_model/video_model_lerobot.yaml`:
+    ```
+    return_action: False
+    return_video: True
+    train_mode: 'video_only'
+    diffusion_model:
+        config:
+            action_expert: False
+    ```
+
+    3. Run
+    ```
+    bash scripts/train.sh main.py configs/ltx_model/video_model_lerobot.yaml
+    ```
+
+5. Action Post-Training
+
+    1. Modify the config in ``configs/ltx_model/policy_model_lerobot.yaml``
+    ```
+    diffusion_model:
+        model_path: PATH_TO_VIDEO_POST_TRAINING_CHECKPOINT_SAFETENSOR
     data:
         train / val:
             data_roots:   [ROOT_PATH_TO_YOUR_DATASETS, ]
@@ -137,19 +171,19 @@ pip install -r requirements.txt
             action_space: "joint"
             ...
     ```
-
     More details of dataset can be found in data/utils/*_dataset.py
 
-
-5. Enable action-model as bellow in `configs/ltx_model/policy_model_lerobot.yaml`:
+    2. Enable action-model as bellow in `configs/ltx_model/policy_model_lerobot.yaml`:
     ```
     return_action: True
     return_video: False
+    train_mode: 'action_full'
     diffusion_model:
         config:
             action_expert: True
     ```
-    Run
+
+    3. Run
     ```
     bash scripts/train.sh main.py configs/ltx_model/policy_model_lerobot.yaml
     ```
