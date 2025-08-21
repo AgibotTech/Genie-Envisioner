@@ -14,7 +14,7 @@ This repo is the official implementation of Genie Envisioner: A Unified World Fo
 
 ## News
 
-- [2025.08.14] 🚀 Weights of [GE-Base](https://huggingface.co/agibot-world/Genie-Envisioner) has been released.
+- [2025.08.14] 🚀 Weights of [GE_base_fast_v0.1](https://huggingface.co/agibot-world/Genie-Envisioner) has been released.
 
 - [2025.08.13] 🚀 Codes of Genie Envisioner has been released.
 
