@@ -1,0 +1,1 @@
+Pickup items in the supermarket: Retrieve cucumber from shelf., Place held cucumber into plastic bag in shopping cart., Retrieve tomato from shelf., Place held tomato into plastic bag in shopping cart., Retrieve corn from shelf., Place held corn into shopping cart's plastic bag.

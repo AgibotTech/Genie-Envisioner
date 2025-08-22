@@ -245,6 +245,35 @@ bash web_infer_scripts/run_server.sh
 bash web_infer_scripts/run_simple_client.sh
 ```
 
+### Video Generation
+
+You can generate videos as bellow:
+```
+bash scripts/infer.sh main.py \
+    configs/ltx_model/video_model_infer_slow.yaml \
+    path/to/trained/checkpoint.safetensors \
+    path/to/save/outputs \
+    DATASETNAME
+```
+
+We also provide two examples in ``video_gen_examples`` and a simple script to generate videos. As described in our paper, the video generation model takes sparse memory frames as input. Therefore, each sample in ``video_gen_examples`` includes four multi-view images sampled from history frames.
+
+```
+python examples/infer.py \
+    --config_file configs/ltx_model/video_model_infer_slow.yaml \
+    --image_root video_gen_examples/sample_0 \
+    --prompt_txt_file video_gen_examples/sample_0/prompt.txt \
+    --output_path path/to/save/results
+```
+
+As detailed in our paper, we provide two pre-trained video generation models:
+
+- [GE-Base-slow](https://huggingface.co/agibot-world/Genie-Envisioner/blob/main/GE_base_slow_v0.1.safetensors) (Mid-Range frequency video generation, synchronized with action dynamics)
+- [GE-Base-fast](https://huggingface.co/agibot-world/Genie-Envisioner/blob/main/GE_base_fast_v0.1.safetensors) (Low-Frequency video generation optimized for low-latency applications)
+
+When utilizing these models, please select the appropriate configuration file and ensure the ``diffusion_model.model_path`` parameter correctly points to your chosen model weights
+
+
 
 ## Citation
 ```bib

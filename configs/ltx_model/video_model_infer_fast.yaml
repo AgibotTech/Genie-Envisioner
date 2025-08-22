@@ -1,0 +1,168 @@
+model_name: 'ltx_train'
+is_i2v: True
+report_to: None
+tracker_name: ltx_trainer
+
+logging_dir: logs
+output_dir: PATH_TO_SAVE_LOGS_AND_CHECKPOINTS
+pretrained_model_name_or_path: PATH_TO_PRETRAINED_WEIGHTS_OF_VAE_AND_TOKENIZER
+
+###
+train_data_class_path: data/agibotworld_dataset.py
+train_data_class: AgiBotWorld
+val_data_class_path: data/agibotworld_dataset.py
+val_data_class: AgiBotWorld
+
+### 
+tokenizer_class_path: transformers
+tokenizer_class: T5Tokenizer
+textenc_class_path: transformers
+textenc_class: T5EncoderModel
+vae_class_path: models/ltx_models/autoencoder_kl_ltx.py
+vae_class: AutoencoderKLLTXVideo
+diffusion_model_class_path: models/ltx_models/transformer_ltx_multiview.py
+diffusion_model_class: LTXVideoTransformer3DModel
+diffusion_scheduler_class_path: diffusers
+diffusion_scheduler_class: FlowMatchEulerDiscreteScheduler
+
+pipeline_class_path: models/pipeline/custom_pipeline.py
+pipeline_class: CustomPipeline
+
+# 
+return_action: false
+return_video: true
+train_mode: 'video_only'
+action_loss_scale: 1.0
+
+# total training step is decided by the minimum of the below two
+train_steps: 1000000
+train_epochs: 10000
+steps_to_save: 2000
+steps_to_log: 20
+steps_to_val: 2000
+
+mixed_precision: bf16
+allow_tf32: False
+
+# timeout, seconds
+nccl_timeout: 600
+seed: 42
+
+# vae
+enable_slicing: True
+enable_tiling: True
+
+add_state: False
+
+caption_dropout_p: 0.06
+
+# dataloader
+batch_size: 8
+dataloader_num_workers: 8
+pin_memory: True
+
+gradient_checkpointing: True
+noise_to_first_frame: 0.1
+
+# Optimizer Config
+optimizer: adamw
+lr: 3e-5
+beta1: 0.9
+beta2: 0.95
+beta3: 0.999
+epsilon: 1e-8
+weight_decay: 1e-5
+optimizer_8bit: False
+optimizer_torchao: False
+scale_lr: False
+
+max_grad_norm: 1.0
+gradient_accumulation_steps: 1
+
+# lr_scheduler Config
+lr_scheduler: constant_with_warmup
+lr_warmup_steps: 1000
+lr_num_cycles: 1
+lr_power: 1.0
+
+
+# Timestep Config
+flow_weighting_scheme: none
+flow_logit_mean: 0.0
+flow_logit_std: 1.0
+flow_mode_scale: 1.29
+
+pixel_wise_timestep: True
+
+diffusion_model:
+  model_path: PATH_TO_CHECKPOINT_SAFETENSOR
+  config:
+    activation_fn: gelu-approximate
+    attention_bias: true
+    attention_head_dim: 64
+    attention_out_bias: true
+    caption_channels: 4096
+    cross_attention_dim: 2048
+    in_channels: 128
+    norm_elementwise_affine: false
+    norm_eps: 1.0e-6
+    num_attention_heads: 32
+    num_layers: 28
+    out_channels: 128
+    patch_size: 1
+    patch_size_t: 1
+    qk_norm: rms_norm_across_heads
+    action_expert: false
+    action_in_channels: 14
+    action_num_attention_heads: 16
+    action_attention_head_dim: 32
+
+data:
+  train:
+    data_roots: ["path/to/agibot-world/beta"]
+    task_info_root: "root/to/agibot-world/beta/task_info"
+    domains: ["agibotworld", ]
+    sample_size: [192, 256]
+    sample_n_frames: 900
+    preprocess :  'resize'
+    valid_cam :  ['head', 'hand_left', 'hand_right']
+    chunk: 9
+    action_chunk: 54
+    n_previous: 4
+    previous_pick_mode: 'random'
+    random_crop: True
+    dataset_info_cache_path: "path/to/save/dataset_meta_info_cache"
+  val:
+    data_roots: ["path/to/agibot-world/beta"]
+    task_info_root: "root/to/agibot-world/beta/task_info"
+    domains: ["agibotworld", ]
+    sample_size: [192, 256]
+    sample_n_frames: 900
+    preprocess :  'resize'
+    valid_cam :  ['head', 'hand_left', 'hand_right']
+    chunk: 9
+    action_chunk: 54
+    n_previous: 4
+    previous_pick_mode: 'random'
+    random_crop: False
+    dataset_info_cache_path: "path/to/save/dataset_meta_info_cache"
+
+use_color_jitter: true
+num_inference_step: 50
+noisy_video: true
+
+# false for quick debug, for training set True
+load_weights: true
+
+# deepspeed config
+use_deepspeed: true
+deepspeed:
+  zero_optimization:
+    stage: 2
+    # offload_optimizer:
+    #   device: cpu
+  fp16:
+    enabled: false
+  bf16:
+    enabled: true
+  gradient_clipping: 1.0

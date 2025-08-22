@@ -169,7 +169,7 @@ log/*
 valid/*
 *.jsonl
 *.gif
-*.png
+# *.png
 *.pyc
 # custom_configs/
 logs/

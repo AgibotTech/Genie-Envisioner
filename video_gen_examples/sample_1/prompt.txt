@@ -1,0 +1,1 @@
+Pickup items in the supermarket: Retrieve pear from the shelf., Place the held pear into the plastic bag in the shopping cart., Retrieve orange from the shelf., Place the held orange into the plastic bag in the shopping cart., Retrieve carambola from the shelf., Place the held carambola into the shopping cart's plastic bag.
