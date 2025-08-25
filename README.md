@@ -45,7 +45,7 @@ pip install -r requirements.txt
 
 #### GE-Act Post-Training
 
-1. Download the pretrained weights of [GE-base](https://huggingface.co/agibot-world/Genie-Envisioner/blob/main/GE_base_fast_v0.1.safetensors) and the weights of tokenizer and vae used in LTX_Video from [HuggingFace](https://huggingface.co/Lightricks/LTX-Video/tree/main), and modify the model weight config in `configs/ltx_model/video_model.yaml`:
+1. Download the pretrained weights of [GE-base](https://huggingface.co/agibot-world/Genie-Envisioner/tree/main) and the weights of tokenizer and vae used in LTX_Video from [HuggingFace](https://huggingface.co/Lightricks/LTX-Video/tree/main), and modify the model weight config in `configs/ltx_model/video_model.yaml`:
     ```
     pretrained_model_name_or_path: PATH/TO/PRETRAINED_WEIGHTS_OF_VAE_AND_TOKENIZER
     diffusion_model:
@@ -268,8 +268,8 @@ python examples/infer.py \
 
 As detailed in our paper, we provide two pre-trained video generation models:
 
-- [GE-Base-slow](https://huggingface.co/agibot-world/Genie-Envisioner/blob/main/GE_base_slow_v0.1.safetensors) (Mid-Range frequency video generation, synchronized with action dynamics)
-- [GE-Base-fast](https://huggingface.co/agibot-world/Genie-Envisioner/blob/main/GE_base_fast_v0.1.safetensors) (Low-Frequency video generation optimized for low-latency applications)
+- [GE-Base-slow](https://huggingface.co/agibot-world/Genie-Envisioner/tree/main) (Mid-Range frequency video generation, synchronized with action dynamics)
+- [GE-Base-fast](https://huggingface.co/agibot-world/Genie-Envisioner/tree/main) (Low-Frequency video generation optimized for low-latency applications)
 
 When utilizing these models, please select the appropriate configuration file and ensure the ``diffusion_model.model_path`` parameter correctly points to your chosen model weights
 
