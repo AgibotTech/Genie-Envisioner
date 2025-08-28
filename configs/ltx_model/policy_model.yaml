@@ -131,7 +131,7 @@ data:
     action_chunk: 54
     n_previous: 4
     previous_pick_mode: 'random'
-    random_crop: True
+    random_crop: False
     dataset_info_cache_path: "path/to/save/dataset_meta_info_cache"
     action_type: "delta"
     action_space: "eef"
