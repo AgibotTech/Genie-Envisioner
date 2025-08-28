@@ -259,7 +259,7 @@ bash scripts/infer.sh main.py \
 We also provide two examples in ``video_gen_examples`` and a simple script to generate videos. As described in our paper, the video generation model takes sparse memory frames as input. Therefore, each sample in ``video_gen_examples`` includes four multi-view images sampled from history frames.
 
 ```
-python examples/infer.py \
+python video_gen_examples/infer.py \
     --config_file configs/ltx_model/video_model_infer_slow.yaml \
     --image_root video_gen_examples/sample_0 \
     --prompt_txt_file video_gen_examples/sample_0/prompt.txt \
