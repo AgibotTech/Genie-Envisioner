@@ -234,7 +234,7 @@ if __name__ == "__main__":
         normed_state = None
     
     if args.prompt is None:
-        asser(args.prompt_txt_file is not None)
+        assert(args.prompt_txt_file is not None)
         with open(args.prompt_txt_file, "r") as f:
             args.prompt = f.readline().strip()
     
