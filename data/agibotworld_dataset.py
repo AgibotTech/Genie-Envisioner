@@ -237,7 +237,7 @@ class AgiBotWorld(Dataset):
         indexes = np.clip(indexes, a_min=1, a_max=total_frames-1).tolist()
         video_end = indexes[-self.action_chunk:]
         mem_candidates = [
-            indexes[int(i)] for i in np.linspace(0, self.sample_n_frames-self.action_chunk-1, total_frames-self.action_chunk).tolist()
+            indexes[int(i)] for i in range(0, self.sample_n_frames-self.action_chunk-1).tolist()
         ]
         if self.previous_pick_mode == 'uniform':
             mem_indexes = [mem_candidates[int(i)] for i in np.linspace(0, len(mem_candidates)-1, self.n_previous).tolist()]
@@ -248,7 +248,7 @@ class AgiBotWorld(Dataset):
         else:
             raise NotImplementedError(f"unsupported previous_pick_mode: {self.previous_pick_mode}")       
 
-        frame_indexes = mem_indexes + video_end[::self.video_temporal_stride]
+        frame_indexes = mem_indexes + video_end[self.video_temporal_stride-1::self.video_temporal_stride]
         
         action_indexes = mem_indexes + video_end
 
