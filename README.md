@@ -14,7 +14,7 @@ This repo is the official implementation of Genie Envisioner: A Unified World Fo
 
 ## News
 
-- [2025.08.14] 🚀 Weights of [GE_base_fast_v0.1](https://huggingface.co/agibot-world/Genie-Envisioner) has been released.
+- [2025.08.14] 🚀 Weights of [GE_base](https://huggingface.co/agibot-world/Genie-Envisioner) has been released.
 
 - [2025.08.13] 🚀 Codes of Genie Envisioner has been released.
 
@@ -51,6 +51,7 @@ pip install -r requirements.txt
     diffusion_model:
     model_path: PATH/TO/GE_base_{version}.safetensors
     ```
+    Note: If you are only performing the post training phase, you do not need to download the complete LTX model weights. You only need to download the weights for the [text_encoder](https://huggingface.co/Lightricks/LTX-Video/tree/main/text_encoder), [tokenizer](https://huggingface.co/Lightricks/LTX-Video/tree/main/tokenizer) and [VAE](https://huggingface.co/Lightricks/LTX-Video/tree/main/vae), as well as the [model_index.json](https://huggingface.co/Lightricks/LTX-Video/blob/main/model_index.json), and place them in the same directory.
 
 2. Build your own LeRoBot dataset following the instruction in [LeRoBot](https://github.com/huggingface/lerobot) and [a conversion script of AgiBotWorld](https://github.com/OpenDriveLab/AgiBot-World/blob/main/scripts/convert_to_lerobot.py).
 
