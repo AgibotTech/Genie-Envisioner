@@ -264,7 +264,7 @@ class CustomLeRobotDataset(Dataset):
         indexes = np.clip(indexes, a_min=1, a_max=total_frames-1).tolist()
         video_end = indexes[-self.action_chunk:]
         mem_candidates = [
-            indexes[int(i)] for i in range(0, self.sample_n_frames-self.action_chunk-1).tolist()
+            indexes[int(i)] for i in range(0, self.sample_n_frames-self.action_chunk-1)
         ]
 
         if self.previous_pick_mode == 'uniform':
@@ -400,9 +400,17 @@ class CustomLeRobotDataset(Dataset):
 
         action_mean, action_std = self.get_action_bias_std(domain_name)
         state_mean, state_std = self.get_action_bias_std(domain_name + "_state")
+        
+        ###
+        ### example data
+        ### data[self.action_key] with the shape of T*C: [[1.0, 1.0, 1.0, ...], ...]
+        ### data[self.state_key]  with the shape of T*C: [[1.0, 1.0, 1.0, ...], ...]
+        try:
+            action = np.stack([data[self.action_key][i] for i in range(data[self.action_key].shape[0])])
+            state = np.stack([data[self.state_key][i] for i in range(data[self.state_key].shape[0])])
+        except:
+            raise ValueError("We currently only support action and state data with the shape of T*C!")
 
-        action = np.stack([data[self.action_key][i][0] for i in range(data[self.action_key].shape[0])])
-        state = np.stack([data[self.state_key][i][0] for i in range(data[self.state_key].shape[0])])
         state = torch.FloatTensor(state)[indexes][self.n_previous-1:self.n_previous]
         
         state = (state - state_mean) / state_std
