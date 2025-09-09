@@ -256,7 +256,7 @@ class AgiBotWorld(Dataset):
 
 
     def get_action_bias_std(self, domain_name):
-        return torch.tensor(StatisticInfo[domain_name + "_" + self.action_space]['mean']).unsqueeze(0), torch.tensor(StatisticInfo[domain_name + "_" + self.action_space]['std']).unsqueeze(0)
+        return torch.tensor(StatisticInfo[domain_name + "_" + self.action_space]['mean']).unsqueeze(0), torch.tensor(StatisticInfo[domain_name + "_" + self.action_space]['std']).unsqueeze(0)+1e-6
 
 
     def get_action(self, h5_file, slices, domain_name):

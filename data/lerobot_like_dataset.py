@@ -283,7 +283,7 @@ class CustomLeRobotDataset(Dataset):
 
 
     def get_action_bias_std(self, domain_name):
-        return torch.tensor(StatisticInfo[domain_name+"_"+self.action_space]['mean']).unsqueeze(0), torch.tensor(StatisticInfo[domain_name+"_"+self.action_space]['std']).unsqueeze(0)
+        return torch.tensor(StatisticInfo[domain_name+"_"+self.action_space]['mean']).unsqueeze(0), torch.tensor(StatisticInfo[domain_name+"_"+self.action_space]['std']).unsqueeze(0)+1e-6
 
 
     def seek_mp4(self, video_path, cam_name_list, slices):
