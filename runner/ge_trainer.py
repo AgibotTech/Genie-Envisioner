@@ -828,6 +828,7 @@ class Trainer:
             history_action_state = history_action_state,
             pixel_wise_timestep = self.args.pixel_wise_timestep,
             n_chunk=n_chunk,
+            action_dim=self.args.diffusion_model["config"]["action_in_channels"],
         )[0]
 
         if cap is None:

@@ -283,6 +283,7 @@ class MVActor:
             pixel_wise_timestep = self.args.pixel_wise_timestep,
             n_chunk=1,
             return_dict=False,
+            action_dim=self.args.diffusion_model["config"]["action_in_channels"],
         )[0]
 
         ### 1,t,c
