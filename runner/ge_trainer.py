@@ -850,7 +850,8 @@ class Trainer:
             action_logs = act_metric(
                 preds['action'][:,:,:action_dim].detach().cpu().to(torch.float).numpy()[:batch_size],
                 gt_actions[:,:,:action_dim].detach().cpu().to(torch.float).numpy()[:batch_size],
-                prefix=cap, bias_std=bias_std, start_stop_interval=[(0,1),(1,9),(9,25),(25,self.args.data['train']['action_chunk'])]
+                prefix=cap,
+                start_stop_interval=[(0,1),(1,9),(9,25),(25,self.args.data['train']['action_chunk'])]
             )
 
             if to_log:
