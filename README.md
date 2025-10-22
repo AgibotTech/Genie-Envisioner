@@ -14,7 +14,7 @@ This repo is the official implementation of Genie Envisioner: A Unified World Fo
 
 ## News
 
-- [2025.10.22] 🚀 Example results, codes of GE-Sim (the latest version based on [Cosmos2](https://huggingface.co/nvidia/Cosmos-Predict2-2B-Video2World)) have been released. Detailed usage can be found in [GE-Sim](#ge-sim-inference) and the example results can be found in [Example results of GE-sim](#example-results-of-ge-sim). The pretrained weights of GE-Sim will be released soon.
+- [2025.10.22] 🚀 Example results and codes of GE-Sim (the latest version based on [Cosmos2](https://huggingface.co/nvidia/Cosmos-Predict2-2B-Video2World)) have been released. Detailed usage can be found in [GE-Sim](#ge-sim-inference) and the example results can be found in [Example results of GE-sim](#example-results-of-ge-sim). The pretrained weights of GE-Sim will be released soon.
 
 - [2025.10.17] 📄 The technical report [Genie Envisioner: A Unified World Foundation Platform for Robotic Manipulation](https://arxiv.org/abs/2508.05635) has been updated. More experimental results for GE-Act are provided. 
 
