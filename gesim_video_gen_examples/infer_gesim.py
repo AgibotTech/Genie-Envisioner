@@ -140,7 +140,7 @@ def load_images(args, image_root, valid_cams, size=(256,192)):
         images = []
         for i in range(n_mem):
             img = cv2.imread(os.path.join(image_root, cam, str(i)+".png"))[:,:,::-1]
-            ori_sizes.append([img.shape, ])
+            ori_sizes.append(img.shape, )
             img = cv2.resize(img, size)
             img = img.astype(np.float32) / 255.0 * 2.0 - 1.0
             img = torch.from_numpy(np.transpose(img, (2,0,1)))
@@ -150,10 +150,10 @@ def load_images(args, image_root, valid_cams, size=(256,192)):
         mv_images.append(images)
     ### v,c,t,h,w
     mv_images = torch.stack(mv_images, dim=0)
-    return mv_images
+    return mv_images, ori_sizes
 
 
-def load_cam_infos(extrinsic_root, intrinsic_root, valid_cams, size=(192,256)):
+def load_cam_infos(extrinsic_root, intrinsic_root, valid_cams, orisize=None, size=(192,256)):
     extrinsics = []
     intrinsics = []
     for cam in valid_cams:
@@ -163,6 +163,12 @@ def load_cam_infos(extrinsic_root, intrinsic_root, valid_cams, size=(192,256)):
     extrinsics = np.stack(extrinsics, axis=0)
     ### v,3,3
     intrinsics = np.stack(intrinsics, axis=0)
+
+    intrinsics[:,0,0] = intrinsics[:,0,0] * size[1] / orisize[0][1]
+    intrinsics[:,0,2] = intrinsics[:,0,2] * size[1] / orisize[0][1]
+    intrinsics[:,1,1] = intrinsics[:,1,1] * size[0] / orisize[0][0]
+    intrinsics[:,1,2] = intrinsics[:,1,2] * size[0] / orisize[0][0]
+
     return extrinsics, intrinsics
 
 
@@ -184,7 +190,7 @@ def infer(
 
     valid_cams = [_+"_color" for _ in args.data["train"]["valid_cam"]]
 
-    obs = load_images(args, image_root, valid_cams, size=(args.data["train"]["sample_size"][1], args.data["train"]["sample_size"][0]))
+    obs, ori_sizes = load_images(args, image_root, valid_cams, size=(args.data["train"]["sample_size"][1], args.data["train"]["sample_size"][0]))
 
     v,c,t,h,w = obs.shape
 
@@ -193,7 +199,7 @@ def infer(
 
     ### extrinsics: v,t,4,4
     ### intrinsics: v,3,3
-    extrinsics, intrinsics = load_cam_infos(extrinsic_root, intrinsic_root, args.data["train"]["valid_cam"], size=(args.data["train"]["sample_size"]))
+    extrinsics, intrinsics = load_cam_infos(extrinsic_root, intrinsic_root, args.data["train"]["valid_cam"], orisize=ori_sizes, size=(args.data["train"]["sample_size"]))
     ### actions   : t,c
     actions = np.load(action_path)
 
