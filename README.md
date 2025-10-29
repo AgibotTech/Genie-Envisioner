@@ -14,7 +14,11 @@ This repo is the official implementation of Genie Envisioner: A Unified World Fo
 
 ## News
 
-- [2025.08.14] 🚀 Weights of [GE_base](https://huggingface.co/agibot-world/Genie-Envisioner) has been released.
+- [2025.10.22] 🚀 Example results, inference codes of GE-Sim (the latest version based on [Cosmos2](https://huggingface.co/nvidia/Cosmos-Predict2-2B-Video2World)) have been released. Detailed usage can be found in [GE-Sim Inference](#ge-sim-inference) and the example results can be found in [Example results of GE-sim](#example-results-of-ge-sim). The pretrained weights of GE-Sim will be released soon.
+
+- [2025.10.17] 📄 The technical report [Genie Envisioner: A Unified World Foundation Platform for Robotic Manipulation](https://arxiv.org/abs/2508.05635) has been updated. More experimental results for GE-Act are provided. 
+
+- [2025.08.14] 🚀 Weights of [GE_base](https://huggingface.co/agibot-world/Genie-Envisioner) has been released. Detailed 
 
 - [2025.08.13] 🚀 Codes of Genie Envisioner has been released.
 
@@ -27,6 +31,7 @@ This repo is the official implementation of Genie Envisioner: A Unified World Fo
 - [x] Release inference & training code
 - [x] Release model weights
 - [ ] Support more backbone models
+
 
 
 
@@ -246,6 +251,7 @@ bash web_infer_scripts/run_server.sh
 bash web_infer_scripts/run_simple_client.sh
 ```
 
+
 ### Video Generation
 
 You can generate videos as bellow:
@@ -273,6 +279,88 @@ As detailed in our paper, we provide two pre-trained video generation models:
 - [GE-Base-fast](https://huggingface.co/agibot-world/Genie-Envisioner/tree/main) (Low-Frequency video generation optimized for low-latency applications)
 
 When utilizing these models, please select the appropriate configuration file and ensure the ``diffusion_model.model_path`` parameter correctly points to your chosen model weights
+
+
+
+
+
+### GE-Sim Inference
+
+We provide an example script ``gesim_video_gen_examples/infer_gesim.py`` for GE-Sim inference. For simplicity, this script directly load extrinsics, intrinsics and actions from .npy files.
+
+We also provide an example data-conversion script ``gesim_video_gen_examples/get_example_gesim_inputs.py`` that reorganizes the data in [AgiBotWorld](https://huggingface.co/datasets/agibot-world/AgiBotWorld-Beta) to fit the data format used in ``gesim_video_gen_examples/infer_gesim.py``.
+
+
+```
+
+# 1. Convert an episode to .npy files or build your custom data
+#    If you only want to use the provided example data in gesim_video_gen_examples/sample_0, you can skip this step.
+
+python gesim_video_gen_examples/get_example_gesim_inputs.py --data_root=${YOUR_AGIBOTWORLD_ROOT} --task_id=${TASK_id} --episode_id=${EPI_ID} --save_root=gesim_video_gen_examples/sample_0 --valid_start=0 --valid_end=300
+
+# 2. Download the weights of GE-Sim. (Weights will be released soon.) 
+
+# 3. Download the scheduler config and the weights of text_encoder, tokenizers and vae of nvidia/Cosmos-Predict2-2B-Video2World from https://huggingface.co/nvidia/Cosmos-Predict2-2B-Video2World
+
+# 4. Modify the PATH in configs/cosmos_model/acwm_cosmos.yaml
+
+# 5. Run the following command
+
+python gesim_video_gen_examples/infer_gesim.py \
+    --config_file=configs/cosmos_model/acwm_cosmos.yaml \
+    --image_root=gesim_video_gen_examples/sample_0 \
+    --extrinsic_root=gesim_video_gen_examples/sample_0 \
+    --intrinsic_root=gesim_video_gen_examples/sample_0 \
+    --action_path=gesim_video_gen_examples/sample_0/actions.npy \
+    --output_path=gesim_video_gen_examples/sample_0_res
+```
+
+
+## Example results of GE-sim
+
+### Example results of interaction with objects
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/2ce55fe0-3a30-4291-8ce1-e0cc95fc5f80" width="70%"> </video>
+</div>
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/e644a39f-def6-42bd-a065-c0b06f937fd2" width="70%"> </video>
+</div>
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/265d7f83-b1ca-426c-af62-7be12045051f" width="70%"> </video>
+</div>
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/5b77fbd5-7b2d-4450-ae97-11da345ee623" width="70%"> </video>
+</div>
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/ae4cd41a-4606-4425-a82e-6d45e74249b8" width="70%"> </video>
+</div>
+
+
+### Example results of artificial trajectories
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/bbbc68a7-1e0c-4080-8111-921238c66993" width="70%"> </video>
+</div>
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/ce025a54-8d98-4b83-8e12-114d6d914d78" width="70%"> </video>
+</div>
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/0547de3a-be9c-445a-8b00-96cbbd907491" width="70%"> </video>
+</div>
+
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/e81f7f5b-2b52-4c20-8c1c-c17351aa33a1" width="70%" > </video> 
+</div>
+
+
+
 
 
 

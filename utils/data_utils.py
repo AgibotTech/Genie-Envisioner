@@ -285,8 +285,6 @@ def gen_noise_from_condition_frame_latent(
     
     condition_frame_latent: (b v) c m h w
 
-    modified from 
-
     """
 
     mem_size = condition_frame_latent.shape[2]

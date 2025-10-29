@@ -1,0 +1,103 @@
+model_name: 'cosmos2_train'
+is_i2v: True
+report_to: None
+tracker_name: cosmos2_trainer
+
+logging_dir: logs
+
+pretrained_model_name_or_path: PATH_TO_PRETRAINED_WEIGHTS_OF_VAE_AND_TOKENIZER
+tokenizer_pretrained_model_name_or_path: PATH_TO_PRETRAINED_WEIGHTS_OF_VAE_AND_TOKENIZER
+
+
+### 
+tokenizer_class_path: transformers
+tokenizer_class: T5TokenizerFast
+textenc_class_path: transformers
+textenc_class: T5EncoderModel
+
+vae_class_path: models/cosmos_models/models/autoencoders/autoencoder_kl_wan.py
+vae_class: AutoencoderKLWan
+
+diffusion_model_class_path: models/cosmos_models/models/transformers/transformer_cosmos_multiview.py
+diffusion_model_class: MultiViewCosmosTransformer3DModel
+
+diffusion_scheduler_class_path: models/pipeline/gesim_cosmos2_pipeline_utils/scheduling_flow_match_euler_discrete.py
+diffusion_scheduler_class: FlowMatchEulerDiscreteScheduler 
+
+pipeline_class_path: models/pipeline/gesim_pipeline.py
+pipeline_class: GeSimCosmos2Pipeline
+
+
+# 
+return_action: false
+return_video: true
+action_loss_scale: 1.0
+action_cond_mode: true
+
+mixed_precision: bf16
+allow_tf32: False
+
+# timeout, seconds
+nccl_timeout: 600
+seed: 42
+
+# vae
+enable_slicing: True
+enable_tiling: True
+
+
+# Timestep Config
+flow_weighting_scheme: none
+flow_logit_mean: 0.0
+flow_logit_std: 1.0
+flow_mode_scale: 1.29
+
+pixel_wise_timestep: False
+
+
+diffusion_model:
+  model_path: LOCAL_PATH/TO/ge_sim_cosmos_v0.1.safetensors
+
+  config:
+    in_channels: 26  # 16 (vae) + 3 (traj) + 6 (raymap) + 1 (padding mask)
+    out_channels: 16
+    num_attention_heads: 16
+    attention_head_dim: 128
+    num_layers: 28
+    mlp_ratio: 4.0
+    text_embed_dim: 1024
+    adaln_lora_dim: 256
+    max_size: [128, 240, 240]
+    patch_size: [1, 2, 2]
+    rope_scale: [1.0, 3.0, 3.0]
+    concat_padding_mask: true  # TODO: no idea how does this work
+    extra_pos_embed_type: null
+    use_view_embed: true
+    action_expert: false
+    action_in_channels: 7
+    action_num_attention_heads: 16
+    action_attention_head_dim: 32
+    action_rope_dim: 32
+
+
+data:
+  train:
+    sample_size: [384, 512]
+    sample_n_frames: 360
+    preprocess :  'resize'
+    valid_cam :  ['head', 'hand_left', 'hand_right']
+    chunk: 25 ### 4n+1 for cosmos without padding frames
+    action_chunk: 25
+    n_previous: 4
+  val:
+    sample_size: [384, 512]
+    sample_n_frames: 360
+    preprocess :  'resize'
+    valid_cam :  ['head', 'hand_left', 'hand_right']
+    chunk: 25
+    action_chunk: 25
+    n_previous: 4
+
+num_inference_step: 15
+
+load_weights: true
