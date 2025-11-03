@@ -14,11 +14,13 @@ This repo is the official implementation of Genie Envisioner: A Unified World Fo
 
 ## News
 
-- [2025.10.22] 🚀 Example results, inference codes of GE-Sim (the latest version based on [Cosmos2](https://huggingface.co/nvidia/Cosmos-Predict2-2B-Video2World)) have been released. Detailed usage can be found in [GE-Sim Inference](#ge-sim-inference) and the example results can be found in [Example results of GE-sim](#example-results-of-ge-sim). The pretrained weights of GE-Sim will be released soon.
-
+- [2025.10.22] 🚀 Pretrained Weights of [GE-Sim(Cosmos2-based version)](https://modelscope.cn/models/agibot_world/Genie-Envisioner/file/view/master/ge_sim_cosmos_v0.1.safetensors) have been released.
+ 
+- [2025.10.22] 🚀 Example results and codes of GE-Sim (the latest version based on [Cosmos2](https://huggingface.co/nvidia/Cosmos-Predict2-2B-Video2World)) have been released. Detailed usage can be found in [GE-Sim](#ge-sim-inference) and the example results can be found in [Example results of GE-sim](#example-results-of-ge-sim).
+  
 - [2025.10.17] 📄 The technical report [Genie Envisioner: A Unified World Foundation Platform for Robotic Manipulation](https://arxiv.org/abs/2508.05635) has been updated. More experimental results for GE-Act are provided. 
 
-- [2025.08.14] 🚀 Weights of [GE_base](https://huggingface.co/agibot-world/Genie-Envisioner) has been released. Detailed 
+- [2025.08.14] 🚀 Weights of [GE_base](https://huggingface.co/agibot-world/Genie-Envisioner) have been released.
 
 - [2025.08.13] 🚀 Codes of Genie Envisioner has been released.
 
@@ -92,7 +94,25 @@ pip install -r requirements.txt
     └── ...
     ```
 
-3. Calculate the action statistics and add them to ``data/utils/statistics.py``.
+3. Calculate the action statistics. We provide an example script for LeRoBot-like datasets ``scripts/get_statistics.py`` and you can run the script as bellow:
+    
+    ```
+    python scripts/get_statistics.py --data_root PATH/TO/YOUR/DATASET --data_name $DATASETNAM --data_type joint --action_key action --state_key observation.state --save_path PATH/OF/FILE.json
+    ```
+
+    After running the script, you can get a json file of statistics. You can specific the path of json file in configs:
+    
+    ```
+    data:
+        train:
+            ...
+            stat_file: PATH/OF/FILE.json
+        val:
+            ...
+            stat_file: PATH/OF/FILE.json
+    ```
+
+    Content of the json file:
     ```
     {
         "DATASETNAME_joint": {
@@ -127,6 +147,7 @@ pip install -r requirements.txt
         }
     }
     ```
+    
 
 4. Task-specific video adaption
     
@@ -298,7 +319,7 @@ We also provide an example data-conversion script ``gesim_video_gen_examples/get
 
 python gesim_video_gen_examples/get_example_gesim_inputs.py --data_root=${YOUR_AGIBOTWORLD_ROOT} --task_id=${TASK_id} --episode_id=${EPI_ID} --save_root=gesim_video_gen_examples/sample_0 --valid_start=0 --valid_end=300
 
-# 2. Download the weights of GE-Sim. (Weights will be released soon.) 
+# 2. Download the weights of GE-Sim(cosmos-based version) from https://modelscope.cn/models/agibot_world/Genie-Envisioner/file/view/master/ge_sim_cosmos_v0.1.safetensors
 
 # 3. Download the scheduler config and the weights of text_encoder, tokenizers and vae of nvidia/Cosmos-Predict2-2B-Video2World from https://huggingface.co/nvidia/Cosmos-Predict2-2B-Video2World
 
@@ -388,10 +409,11 @@ python gesim_video_gen_examples/infer_gesim.py \
 
 - The LTX-Video Model [Paper](https://arxiv.org/abs/2501.00103) [Github](https://github.com/Lightricks/LTX-Video)
 
+- The Cosmos Model [Github](https://github.com/nvidia-cosmos)
 
 
 ## License
 
-Codes in the directory ``models/ltx_models``, ``models/pipeline`` and ``web_infer_utils/openpi_client`` are modified from [Diffusers](https://github.com/huggingface/diffusers/), [LTX-Video](https://github.com/Lightricks/LTX-Video) and [openpi](https://github.com/Physical-Intelligence/openpi), which means these codes under [Apache License 2.0](https://github.com/huggingface/diffusers/blob/main/LICENSE).
+Codes in the directory ``models/ltx_models``,  ``models/cosmos_models``, ``models/pipeline`` and ``web_infer_utils/openpi_client`` are modified from [Diffusers](https://github.com/huggingface/diffusers/), [LTX-Video](https://github.com/Lightricks/LTX-Video), [Cosmos](https://github.com/nvidia-cosmos) and [openpi](https://github.com/Physical-Intelligence/openpi), which means these codes under [Apache License 2.0](https://github.com/huggingface/diffusers/blob/main/LICENSE).
 
 Other data and codes within this repo are under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).

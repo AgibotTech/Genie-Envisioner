@@ -68,6 +68,7 @@ class CustomLeRobotDataset(Dataset):
         fix_epiidx = None,
         fix_sidx = None,
         fix_mem_idx = None,
+        stat_file = None,
     ):
         """
         data_roots:              directory of LeRoBot dataset
@@ -246,6 +247,12 @@ class CustomLeRobotDataset(Dataset):
         self.fix_sidx = fix_sidx
         self.fix_mem_idx = fix_mem_idx
 
+        ### load stat_file if provided
+        self.StatisticInfo = StatisticInfo
+        if stat_file is not None:
+            with open(stat_file, "r") as f:
+                self.StatisticInfo = json.load(f)
+
     def get_frame_indexes(self, total_frames, ):
         """
         select self.n_previous memory frames and self.action_chunk prediction frmaes
@@ -283,7 +290,7 @@ class CustomLeRobotDataset(Dataset):
 
 
     def get_action_bias_std(self, domain_name):
-        return torch.tensor(StatisticInfo[domain_name+"_"+self.action_space]['mean']).unsqueeze(0), torch.tensor(StatisticInfo[domain_name+"_"+self.action_space]['std']).unsqueeze(0)+1e-6
+        return torch.tensor(self.StatisticInfo[domain_name+"_"+self.action_space]['mean']).unsqueeze(0), torch.tensor(self.StatisticInfo[domain_name+"_"+self.action_space]['std']).unsqueeze(0)+1e-6
 
 
     def seek_mp4(self, video_path, cam_name_list, slices):

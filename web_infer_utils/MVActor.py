@@ -94,13 +94,18 @@ class MVActor:
         else:
             action_statistic_name = domain_name + "_" + self.action_space
 
+        self.StatisticInfo = StatisticInfo
+        if get(self.args.data['val'], 'stat_file', None) is not None:
+            with open(self.args.data['val']['stat_file'], "r") as f:
+                self.StatisticInfo = json.load(f)
+
         ### (1,1,C)
-        self.act_mean = torch.tensor(StatisticInfo[action_statistic_name]["mean"]).unsqueeze(0).unsqueeze(0)
-        self.act_std = torch.tensor(StatisticInfo[action_statistic_name]["std"]).unsqueeze(0).unsqueeze(0)
+        self.act_mean = torch.tensor(self.StatisticInfo[action_statistic_name]["mean"]).unsqueeze(0).unsqueeze(0)
+        self.act_std = torch.tensor(self.StatisticInfo[action_statistic_name]["std"]).unsqueeze(0).unsqueeze(0)
 
         ### (C, )
-        self.sta_mean = StatisticInfo[state_statistic_name]["mean"]
-        self.sta_std = StatisticInfo[state_statistic_name]["std"]
+        self.sta_mean = self.StatisticInfo[state_statistic_name]["mean"]
+        self.sta_std = self.StatisticInfo[state_statistic_name]["std"]
 
         
         self.obs = []

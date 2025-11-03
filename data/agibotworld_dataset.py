@@ -57,6 +57,7 @@ class AgiBotWorld(Dataset):
         fix_epiidx = None,
         fix_sidx = None,
         fix_mem_idx = None,
+        stat_file = None,
     ):
 
         """
@@ -211,6 +212,13 @@ class AgiBotWorld(Dataset):
         self.fix_sidx = fix_sidx
         self.fix_mem_idx = fix_mem_idx
 
+
+        ### load stat_file if provided
+        self.StatisticInfo = StatisticInfo
+        if stat_file is not None:
+            with open(stat_file, "r") as f:
+                self.StatisticInfo = json.load(f)
+
     def get_total_timesteps(self, data_root, cam_name):
         with open(os.path.join(data_root, "parameters", "camera", cam_name+"_extrinsic_params_aligned.json"), "r") as f:
             info = json.load(f)
@@ -256,7 +264,7 @@ class AgiBotWorld(Dataset):
 
 
     def get_action_bias_std(self, domain_name):
-        return torch.tensor(StatisticInfo[domain_name + "_" + self.action_space]['mean']).unsqueeze(0), torch.tensor(StatisticInfo[domain_name + "_" + self.action_space]['std']).unsqueeze(0)+1e-6
+        return torch.tensor(self.StatisticInfo[domain_name + "_" + self.action_space]['mean']).unsqueeze(0), torch.tensor(self.StatisticInfo[domain_name + "_" + self.action_space]['std']).unsqueeze(0)+1e-6
 
 
     def get_action(self, h5_file, slices, domain_name):

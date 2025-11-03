@@ -94,6 +94,12 @@ class Inferencer:
         self.device = device
 
 
+        self.StatisticInfo = StatisticInfo
+        if get(self.args.data['val'], 'stat_file', None) is not None:
+            with open(self.args.data['val']['stat_file'], "r") as f:
+                self.StatisticInfo = json.load(f)
+
+
     def prepare_val_dataset(self) -> None:
         if not hasattr(self.args, "val_data_class"):
             self.args.val_data_class = self.args.train_data_class
@@ -295,8 +301,8 @@ class Inferencer:
                     gripper_dim = 1
                     arm_dim = (n_dim - gripper_dim)//2
 
-                    act_mean = np.expand_dims(np.array(StatisticInfo[domain_name + "_" + action_space]["mean"]), axis=0)
-                    act_std = np.expand_dims(np.array(StatisticInfo[domain_name + "_" + action_space]["std"]), axis=0)
+                    act_mean = np.expand_dims(np.array(self.StatisticInfo[domain_name + "_" + action_space]["mean"]), axis=0)
+                    act_std = np.expand_dims(np.array(self.StatisticInfo[domain_name + "_" + action_space]["std"]), axis=0)
 
                     if action_type == "absolute":
                         ### abs_act = norm(act)
@@ -308,8 +314,8 @@ class Inferencer:
                         ### delta_act = norm(delta_act)
                         state = batch["state"][0].data.cpu().float().numpy()
                         state = state * act_std + act_mean
-                        dact_mean = np.expand_dims(np.array(StatisticInfo[domain_name + "_delta" + "_" + action_space]["mean"]), axis=0)
-                        dact_std = np.expand_dims(np.array(StatisticInfo[domain_name+ "_delta" + "_" + action_space]["std"]), axis=0)
+                        dact_mean = np.expand_dims(np.array(self.StatisticInfo[domain_name + "_delta" + "_" + action_space]["mean"]), axis=0)
+                        dact_std = np.expand_dims(np.array(self.StatisticInfo[domain_name+ "_delta" + "_" + action_space]["std"]), axis=0)
                         pd_actions_arr = pd_actions_arr * dact_std + dact_mean
                         gt_actions_arr = gt_actions_arr * dact_std + dact_mean
                         ### left arm
