@@ -412,7 +412,7 @@ python gesim_video_gen_examples/infer_gesim.py \
 - The Cosmos Model [Github](https://github.com/nvidia-cosmos)
 
 
-## contact
+## Contact
 
 If you have any question, feel free to join the [WeChat Group](figs/joint_wechat_group.jpg) to get in touch.
 
