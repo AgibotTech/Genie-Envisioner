@@ -5,6 +5,8 @@
 ![Overview](figs/overview.png)
 
  <a href='https://arxiv.org/abs/2508.05635'><img src='https://img.shields.io/badge/arXiv-2508.05635-b31b1b.svg'></a> &nbsp; <a href='https://genie-envisioner.github.io/'><img src='https://img.shields.io/badge/Site-GenieEnvisioner-blue'></a> &nbsp;
+ 
+Join our [WeChat Group](figs/joint_wechat_group.jpg)
 
 
 </div>
@@ -411,10 +413,6 @@ python gesim_video_gen_examples/infer_gesim.py \
 
 - The Cosmos Model [Github](https://github.com/nvidia-cosmos)
 
-
-## Contact
-
-If you have any question, feel free to join the [WeChat Group](figs/joint_wechat_group.jpg) to get in touch.
 
 
 ## License
