@@ -412,6 +412,11 @@ python gesim_video_gen_examples/infer_gesim.py \
 - The Cosmos Model [Github](https://github.com/nvidia-cosmos)
 
 
+## contact
+
+If you have any question, feel free to join the [WeChat Group](figs/joint_wechat_group.jpg) to get in touch.
+
+
 ## License
 
 Codes in the directory ``models/ltx_models``,  ``models/cosmos_models``, ``models/pipeline`` and ``web_infer_utils/openpi_client`` are modified from [Diffusers](https://github.com/huggingface/diffusers/), [LTX-Video](https://github.com/Lightricks/LTX-Video), [Cosmos](https://github.com/nvidia-cosmos) and [openpi](https://github.com/Physical-Intelligence/openpi), which means these codes under [Apache License 2.0](https://github.com/huggingface/diffusers/blob/main/LICENSE).
