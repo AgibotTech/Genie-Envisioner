@@ -56,9 +56,10 @@ class MVActorServer(MVActor):
 
                 ###
                 ### obs:
-                ###     state  : state
-                ###     prompt : task instruction. If prompt startswith '<reset>', the server will reset all saved memories first.
-                ###     obs    : images, 
+                ###     state          : state
+                ###     prompt         : task instruction. If prompt startswith '<reset>', the server will reset all saved memories first.
+                ###     obs            : images, 
+                ###     execution_step : number of execution steps
 
                 action = self.play(**obs)
 
