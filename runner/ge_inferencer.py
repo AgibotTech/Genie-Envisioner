@@ -95,7 +95,7 @@ class Inferencer:
 
 
         self.StatisticInfo = StatisticInfo
-        if get(self.args.data['val'], 'stat_file', None) is not None:
+        if self.args.data['val'].get('stat_file', None) is not None:
             with open(self.args.data['val']['stat_file'], "r") as f:
                 self.StatisticInfo = json.load(f)
 
