@@ -6,7 +6,7 @@
 
  <a href='https://arxiv.org/abs/2508.05635'><img src='https://img.shields.io/badge/arXiv-2508.05635-b31b1b.svg'></a> &nbsp; <a href='https://genie-envisioner.github.io/'><img src='https://img.shields.io/badge/Site-GenieEnvisioner-blue'></a> &nbsp;
  
-Join our [WeChat Group](figs/joint_wechat_group.jpg)
+Join our [WeChat Group](figs/join_wechat_group.jpg)
 
 
 </div>
