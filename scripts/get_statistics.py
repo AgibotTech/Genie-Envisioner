@@ -51,7 +51,7 @@ def get_statistics(data_root, data_name, data_type, save_path, action_key="actio
 
     delta_data_list = np.concatenate(delta_data_list, axis=0)
     assert(len(delta_data_list.shape)==2)
-    delta_means, delta_stds = cal_statistic(data_list, _filter=_filter)
+    delta_means, delta_stds = cal_statistic(delta_data_list, _filter=_filter)
 
     state_list = np.concatenate(state_list, axis=0)
     assert(len(state_list.shape)==2)
