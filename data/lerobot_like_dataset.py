@@ -271,7 +271,7 @@ class CustomLeRobotDataset(Dataset):
         indexes = np.clip(indexes, a_min=1, a_max=total_frames-1).tolist()
         video_end = indexes[-self.action_chunk:]
         mem_candidates = [
-            indexes[int(i)] for i in range(0, self.sample_n_frames-self.action_chunk-1)
+            indexes[int(i)] for i in range(0, self.sample_n_frames-self.action_chunk)
         ]
 
         if self.previous_pick_mode == 'uniform':
