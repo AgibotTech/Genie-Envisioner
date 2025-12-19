@@ -127,6 +127,13 @@ data:
     n_previous: 4
     previous_pick_mode: 'random'
     random_crop: False
+    ignore_seek: False
+    action_type: "absolute"
+    action_space: "eef"
+    stat_file: configs/ltx_model/libero/libero_all.json
+    state_key: state
+    action_key: actions
+    extra_parquet_index: False
   val:
     data_roots: ["path/to/libero-dataset"]
     domains: ["libero"]
@@ -139,7 +146,13 @@ data:
     n_previous: 4
     previous_pick_mode: 'random'
     random_crop: False
-
+    ignore_seek: False
+    action_type: "absolute"
+    action_space: "eef"
+    stat_file: configs/ltx_model/libero/libero_all.json
+    state_key: state
+    action_key: actions
+    extra_parquet_index: False
 
 use_color_jitter: true
 num_inference_step: 10
