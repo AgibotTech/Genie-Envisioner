@@ -9,7 +9,7 @@
 
 ## Evaluating on LIBERO
 
-1. Download [the weights of GE-Act trained on LIBERO dataset](download)
+1. Download [the weights of GE-Act trained on LIBERO dataset](https://modelscope.cn/models/agibot_world/Genie-Envisioner/files)
 
 2. Modify the path of checkpoints in ``experiments/eval_libero.sh``
 
