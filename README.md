@@ -16,6 +16,8 @@ This repo is the official implementation of Genie Envisioner: A Unified World Fo
 
 ## News
 
+- [2025.12.18] 🚀 The instruction of training GE-Act on LIBERO is released.
+
 - [2025.10.22] 🚀 Pretrained Weights of [GE-Sim(Cosmos2-based version)](https://modelscope.cn/models/agibot_world/Genie-Envisioner/file/view/master/ge_sim_cosmos_v0.1.safetensors) have been released. The released GE-Sim model is pretrained on [AgiBotWorld](https://huggingface.co/datasets/agibot-world/AgiBotWorld-Beta).
  
 - [2025.10.22] 🚀 Example results and codes of GE-Sim (the latest version based on [Cosmos2](https://huggingface.co/nvidia/Cosmos-Predict2-2B-Video2World)) have been released. Detailed usage can be found in [GE-Sim](#ge-sim-inference) and the example results can be found in [Example results of GE-sim](#example-results-of-ge-sim).
@@ -35,8 +37,6 @@ This repo is the official implementation of Genie Envisioner: A Unified World Fo
 - [x] Release inference & training code
 - [x] Release model weights
 - [x] Support more backbone models
-
-
 
 
 ## Getting started
@@ -216,6 +216,11 @@ pip install -r requirements.txt
     ```
     bash scripts/train.sh main.py configs/ltx_model/policy_model_lerobot.yaml
     ```
+
+#### GE-Act on Simulation Benchmark
+
+The instruction of trianing GE-Act on LIBERO is provided.
+
 
 
 #### GE-base Pre-Training

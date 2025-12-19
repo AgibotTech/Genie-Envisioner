@@ -31,6 +31,7 @@ from data.utils.statistics import StatisticInfo
 from utils import zero_rank_print
 from data.utils.utils import intrinsic_transform, gen_crop_config, intrin_crop_transform
 
+
 def load_jsonl(jsonl_path):
     """
     load jsonl file
@@ -40,6 +41,7 @@ def load_jsonl(jsonl_path):
         for line in f:
             data.append(json.loads(line))
     return data
+
 
 
 class CustomLeRobotDataset(Dataset):
@@ -70,7 +72,9 @@ class CustomLeRobotDataset(Dataset):
         fix_sidx = None,
         fix_mem_idx = None,
         stat_file = None,
-    
+        extra_parquet_index = False,
+        valid_act_dim = None,
+        valid_sta_dim = None,
     ):
         """
         data_roots:              directory of LeRoBot dataset
@@ -107,6 +111,10 @@ class CustomLeRobotDataset(Dataset):
         fix_sidx:                used in validation stage only, set start index to fix_sidx
         fix_mem_idx:             used in validation stage only, set memory indexes to fix_mem_idx
         stat_file:               used to specific statistics
+        extra_parquet_index:     when extra_parquet_index=True, the shape of the action/state arrary saved in .parquet files should be [T,1,C]; when extra_parquet_index=False, the shape of the action/state arrary saved in .parquet files should be [T,C].
+        valid_act_dim:           when valid_act_dim is not None, only the first $valid_act_dim dimenssions of actions will be used.
+        valid_sta_dim:           when valid_sta_dim is not None, only the first $valid_sta_dim dimenssions of actions will be used.
+
         """
         
         zero_rank_print(f"loading annotations...")
@@ -120,6 +128,9 @@ class CustomLeRobotDataset(Dataset):
 
         self.action_key = action_key
         self.state_key = state_key
+        self.extra_parquet_index = extra_parquet_index
+        self.valid_act_dim = valid_act_dim
+        self.valid_sta_dim = valid_sta_dim
 
         self.random_crop = random_crop
         
@@ -142,10 +153,15 @@ class CustomLeRobotDataset(Dataset):
                 print(f"Loading {_domain_name} data from {_data_root}")
                 
                 # into the meta folder
-                meta_folder = os.path.join(_data_root, _domain_name, "meta")
-                data_folder = os.path.join(_data_root, _domain_name, "data")
-                video_folder = os.path.join(_data_root, _domain_name, "videos")
-                
+                if os.path.exists(os.path.join(_data_root, _domain_name, "meta", "tasks.jsonl")):
+                    meta_folder = os.path.join(_data_root, _domain_name, "meta")
+                    data_folder = os.path.join(_data_root, _domain_name, "data")
+                    video_folder = os.path.join(_data_root, _domain_name, "videos")
+                else:
+                    meta_folder = os.path.join(_data_root, "meta")
+                    data_folder = os.path.join(_data_root, "data")
+                    video_folder = os.path.join(_data_root, "videos")
+                    
                 tasks_jsonl = os.path.join(meta_folder, "tasks.jsonl")
                 task_index_task_str = load_jsonl(tasks_jsonl)
                 task_index_task_str_dict = {}
@@ -160,6 +176,7 @@ class CustomLeRobotDataset(Dataset):
 
                 episodes_jsonl = os.path.join(meta_folder, "episodes.jsonl")
                 epiosdes_data = load_jsonl(episodes_jsonl) # episode_index  tasks  length
+
 
                 for episode_data in tqdm(epiosdes_data):
 
@@ -188,7 +205,6 @@ class CustomLeRobotDataset(Dataset):
                         None, task, # no task_info
                         length,
                     ]
-                    
                     self.dataset.append(info)
 
         if dataset_info_cache_path is not None and not(os.path.exists(dataset_info_cache_path)):
@@ -269,18 +285,17 @@ class CustomLeRobotDataset(Dataset):
         if self.fix_sidx is not None and self.fix_mem_idx is not None:
             action_indexes = list(range(self.fix_sidx, self.fix_sidx+self.action_chunk))
             frame_indexes = action_indexes[::self.video_temporal_stride]
-            action_indexes = np.clip(action_indexes, a_min=0, a_max=total_frames-1)
-            frame_indexes = np.clip(frame_indexes, a_min=0, a_max=total_frames-1)
-            return self.fix_mem_idx + frame_indexes, self.fix_mem_idx + action_indexes
+            action_indexes = np.clip(action_indexes, a_min=0, a_max=total_frames-1).tolist()
+            frame_indexes = np.clip(frame_indexes, a_min=0, a_max=total_frames-1).tolist()
+            fix_mem_idx = np.clip(self.fix_mem_idx, a_min=0, a_max=total_frames-1).tolist()
+            return fix_mem_idx + frame_indexes, fix_mem_idx + action_indexes
 
         chunk_end = random.randint(self.action_chunk, total_frames+self.action_chunk)
-
-        indexes_start = max(-self.n_previous, chunk_end-self.sample_n_frames) ### prevent indexes including too many zeros  when sample_n_frames is much larger than the length of the episode
-        indexes = np.array(list(range(indexes_start, chunk_end)))
-        indexes = np.clip(indexes, a_min=1, a_max=total_frames-1).tolist()
+        indexes = np.array(list(range(max(-100, chunk_end-self.sample_n_frames), chunk_end)))
+        indexes = np.clip(indexes, a_min=0, a_max=total_frames-1).tolist()
         video_end = indexes[-self.action_chunk:]
         # mem_candidates = [
-        #     indexes[int(i)] for i in range(0, self.sample_n_frames-self.action_chunk)
+        #     indexes[int(i)] for i in range(0, self.sample_n_frames-self.action_chunk-1)
         # ]
         mem_candidates = indexes[:-self.action_chunk]
         if len(mem_candidates)<self.n_previous-1:
@@ -294,7 +309,6 @@ class CustomLeRobotDataset(Dataset):
 
         else:
             raise NotImplementedError(f"unsupported previous_pick_mode: {self.previous_pick_mode}")       
-
         if not self.ignore_seek:
             frame_indexes = mem_indexes + video_end[self.video_temporal_stride-1::self.video_temporal_stride]
         else:
@@ -307,6 +321,10 @@ class CustomLeRobotDataset(Dataset):
 
     def get_action_bias_std(self, domain_name):
         return torch.tensor(self.StatisticInfo[domain_name+"_"+self.action_space]['mean']).unsqueeze(0), torch.tensor(self.StatisticInfo[domain_name+"_"+self.action_space]['std']).unsqueeze(0)+1e-6
+
+
+    def get_action_q01_q99(self, domain_name):
+        return torch.tensor(self.StatisticInfo[domain_name+"_"+self.action_space]['q01']).unsqueeze(0), torch.tensor(self.StatisticInfo[domain_name+"_"+self.action_space]['q99']).unsqueeze(0)
 
 
     def seek_mp4(self, video_path, cam_name_list, slices):
@@ -325,28 +343,31 @@ class CustomLeRobotDataset(Dataset):
             video = video.float()/255.
             video_reader.close()
             video_list.append(video)
+        video_list = torch.stack(video_list, dim=1)
         return video_list
+
 
 
     def transform_video(self, videos, specific_transforms_resize, intrinsics, sample_size):
         """
         crop (optional) and resize the videos, and modify the intrinsic accordingly
         """
-        v = len(videos)
+        c, v, t, h, w = videos.shape
         new_videos = []
         new_intrinsics = []
         for iv in range(v):
-            video = videos[iv]
-            c, t, h, w = video.shape
+            video = videos[:, iv]
             if self.random_crop:
                 h_start, w_start, h_crop, w_crop = gen_crop_config(video)
                 video = video[:,:,h_start:h_start+h_crop,w_start:w_start+w_crop]
                 if intrinsics is not None:
                     intrinsic = intrin_crop_transform(intrinsics[iv], h_start, w_start)
+                
                 h, w = h_crop, w_crop
             if intrinsics is not None:
                 intrinsic = intrinsic_transform(intrinsic, (h, w), sample_size, self.preprocess)
                 new_intrinsics.append(intrinsic)
+                
             video = specific_transforms_resize(video)
             new_videos.append(video)
         new_videos = torch.stack(new_videos, dim=1)
@@ -418,61 +439,67 @@ class CustomLeRobotDataset(Dataset):
         data = pd.read_parquet(parquet_path)
 
 
-        action_mean, action_std = self.get_action_bias_std(domain_name)
-        state_mean, state_std = self.get_action_bias_std(domain_name + "_state")
+        action_min, action_max = self.get_action_q01_q99(domain_name)
+        state_min, state_max = self.get_action_q01_q99(domain_name + "_state")
         
         ###
         ### example data
         ### data[self.action_key] with the shape of T*C: [[1.0, 1.0, 1.0, ...], ...]
         ### data[self.state_key]  with the shape of T*C: [[1.0, 1.0, 1.0, ...], ...]
         try:
-            action = np.stack([data[self.action_key][i] for i in range(data[self.action_key].shape[0])])
-            state = np.stack([data[self.state_key][i] for i in range(data[self.state_key].shape[0])])
+            if self.extra_parquet_index:
+                action = np.stack([data[self.action_key][i][0] for i in range(data[self.action_key].shape[0])])
+                state = np.stack([data[self.state_key][i][0] for i in range(data[self.state_key].shape[0])])
+            else:
+                action = np.stack([data[self.action_key][i] for i in range(data[self.action_key].shape[0])])
+                state = np.stack([data[self.state_key][i] for i in range(data[self.state_key].shape[0])])
         except:
             raise ValueError("We currently only support action and state data with the shape of T*C!")
-        
+
         action = action.astype(np.float32)
         state = state.astype(np.float32)
-        state = torch.FloatTensor(state)[indexes][self.n_previous-1:self.n_previous]
-        
-        state = (state - state_mean) / state_std
 
-        if self.action_type == "absolute":
-            ### act = norm(act)
+        state = torch.FloatTensor(state)[indexes]
 
-            action = action[indexes].astype(np.float32)
-            action = torch.FloatTensor(action)
-            action = (action - action_mean) / action_std
+        if self.valid_act_dim is not None:
+            action = action[:, :self.valid_act_dim]
+            action_min = action_min[:, :self.valid_act_dim]
+            action_max = action_max[:, :self.valid_act_dim]
 
-        elif self.action_type == "delta":
-            ### delta_act = norm(act_{t} - act_{t-1})
+        if self.valid_sta_dim is not None:
+            state = state[:, :self.valid_sta_dim]
+            state_min = state_min[:, :self.valid_sta_dim]
+            state_max = state_max[:, :self.valid_sta_dim]
 
-            delta_act_meanv, delta_act_stdv = self.get_action_bias_std(domain_name + "_delta")
-            action_curr = torch.FloatTensor(action[indexes].astype(np.float32))
-            action_last = torch.FloatTensor(action[[_-1 for _ in indexes]].astype(np.float32))
-            delta_action = action_curr - action_last
-            ### keep current effector action
-            delta_action[:, 6] = action_last[:, 6]
-            delta_action[:, 13] = action_last[:, 13]
-            delta_action = (delta_action - delta_act_meanv) / delta_act_stdv
-            action = delta_action
+        state = (state - state_min) / (state_max - state_min + 1e-6)
+        state = state * 2.0 - 1.0
 
-        elif self.action_type == "relative":
-            ### relative_act = norm(act) - norm(state)
+        assert(self.action_type == "absolute")
 
-            action_curr = action[indexes].astype(np.float32)
-            action = torch.FloatTensor(action_curr)
-            action = (action - action_mean) / action_std
-            rel_action = action - state
-            action = rel_action
+        ### act = norm(act)
+        action = action[indexes].astype(np.float32)
+        action = torch.FloatTensor(action)
+        action = (action - action_min) / (action_max - action_min + 1e-6)
+        action = action * 2.0 - 1.0
 
-        else:
+        ori_act_dim = action.shape[1]
 
-            raise NotImplementedError
+        action = torch.cat((action, state), dim=1)
+        state = torch.cat((torch.zeros([1,ori_act_dim]), state[self.n_previous-1:self.n_previous]), dim=1)
 
+        # videos = self.seek_mp4(video_path, self.valid_cam, vid_indexes)
 
-        videos = self.seek_mp4(video_path, self.valid_cam, vid_indexes)
-
+        video_list = []
+        for cam in self.valid_cam:
+            cam_img_bytes = data[cam].to_list()
+            video = []
+            for index in vid_indexes:
+                img = Image.open(io.BytesIO(cam_img_bytes[index]["bytes"]))
+                video.append(img)
+            video = torch.from_numpy(np.stack(video)).permute(3, 0, 1, 2).contiguous()
+            video = video.float()/255.
+            video_list.append(video)
+        videos = torch.stack(video_list, dim=1) 
         videos, _ = self.transform_video(
             videos, specific_transforms_resize, None, sample_size
         )
@@ -481,8 +508,10 @@ class CustomLeRobotDataset(Dataset):
         return videos, action, caption, state
 
 
+
     def __len__(self):
         return self.length
+
 
 
     def __getitem__(self, idx):        
@@ -509,3 +538,4 @@ class CustomLeRobotDataset(Dataset):
             state=state,
         )
         return sample
+
