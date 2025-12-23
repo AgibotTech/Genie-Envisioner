@@ -2,12 +2,6 @@
 
 ## Performance of GE-Act on Simulation Benchmarks
 
-### LIBERO
-
-|  Split | Goal | Object | 10   | Spatial | Average |
-|  ----  | ---- | ----   | ---- | ----    | ----    |
-| Success Rate | 0.958 | 0.976 | 0.944 | 0.982 | 0.965 |
-
 
 ## Calvin
 
@@ -15,19 +9,6 @@
 |  ----  | ---- | ----   | ---- | ----    | ----    | ----    |
 | Success Rate | 0.950 | 0.898 | 0.857 | 0.808 | 0.747 | 4.260 
 
-
-## Evaluating on LIBERO
-
-1. Download [the weights of GE-Act trained on Calvin dataset](https://modelscope.cn/models/agibot_world/Genie-Envisioner/files)
-
-2. Modify the path of checkpoints in ``experiments/eval_libero.sh``
-
-3. Modify the path ``pretrained_model_name_or_path`` in ``configs/ltx_model/libero/action_model_libero.yaml``
-
-3. Run
-    ```
-    bash experiments/eval_libero.sh
-    ```
 
 ## Evaluating on Calvin
 
@@ -42,6 +23,25 @@
     bash experiments/eval_calvin.sh
     ```
 
+
+### LIBERO
+
+|  Split | Goal | Object | 10   | Spatial | Average |
+|  ----  | ---- | ----   | ---- | ----    | ----    |
+| Success Rate | 0.958 | 0.976 | 0.944 | 0.982 | 0.965 |
+
+## Evaluating on LIBERO
+
+1. Download [the weights of GE-Act trained on Calvin dataset](https://modelscope.cn/models/agibot_world/Genie-Envisioner/files)
+
+2. Modify the path of checkpoints in ``experiments/eval_libero.sh``
+
+3. Modify the path ``pretrained_model_name_or_path`` in ``configs/ltx_model/libero/action_model_libero.yaml``
+
+3. Run
+    ```
+    bash experiments/eval_libero.sh
+    ```
 
 
 ## Training on LIBERO
