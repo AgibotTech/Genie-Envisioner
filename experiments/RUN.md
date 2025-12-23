@@ -1,15 +1,24 @@
 # Genie Envisioner: A Unified World Foundation Platform for Robotic Manipulation
 
-## Performance of GE-Act on LIBERO
+## Performance of GE-Act on Simulation Benchmarks
+
+### LIBERO
 
 |  Split | Goal | Object | 10   | Spatial | Average |
 |  ----  | ---- | ----   | ---- | ----    | ----    |
 | Success Rate | 0.958 | 0.976 | 0.944 | 0.982 | 0.965 |
 
 
+## Calvin
+
+|  Split | Len-1 | Len-2 | Len-3 | Len-4 | Len-5 | Avg. Subtasks 
+|  ----  | ---- | ----   | ---- | ----    | ----    | ----    |
+| Success Rate | 0.950 | 0.898 | 0.857 | 0.808 | 0.747 | 4.260 
+
+
 ## Evaluating on LIBERO
 
-1. Download [the weights of GE-Act trained on LIBERO dataset](https://modelscope.cn/models/agibot_world/Genie-Envisioner/files)
+1. Download [the weights of GE-Act trained on Calvin dataset](https://modelscope.cn/models/agibot_world/Genie-Envisioner/files)
 
 2. Modify the path of checkpoints in ``experiments/eval_libero.sh``
 
@@ -19,6 +28,21 @@
     ```
     bash experiments/eval_libero.sh
     ```
+
+## Evaluating on Calvin
+
+1. Download [the weights of GE-Act trained on Calvin dataset](https://modelscope.cn/models/agibot_world/Genie-Envisioner/files)
+
+2. Modify the path of checkpoints in ``experiments/eval_calvin.sh``
+
+3. Modify the path ``pretrained_model_name_or_path`` in ``configs/ltx_model/calvin/action_model_calvin.yaml``
+
+3. Run
+    ```
+    bash experiments/eval_calvin.sh
+    ```
+
+
 
 ## Training on LIBERO
 

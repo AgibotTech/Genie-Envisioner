@@ -596,6 +596,7 @@ class CustomPipeline(DiffusionPipeline, FromSingleFileMixin):
         history_action_state: torch.Tensor = None,
         pixel_wise_timestep: bool = True,
         n_chunk: int = 1,
+        show_progress: bool = False,
         **kwargs,
     ):
         r"""
@@ -824,6 +825,8 @@ class CustomPipeline(DiffusionPipeline, FromSingleFileMixin):
             if self.do_classifier_free_guidance:
                 conditioning_mask = torch.cat([conditioning_mask, conditioning_mask], dim=0)
 
+            if not show_progress:
+                self.set_progress_bar_config(disable=True)
             with self.progress_bar(total=num_inference_steps) as progress_bar:
                 
                 for i, t in enumerate(timesteps):

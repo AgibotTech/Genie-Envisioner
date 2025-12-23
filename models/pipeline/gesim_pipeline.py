@@ -399,7 +399,7 @@ class GeSimCosmos2Pipeline(DiffusionPipeline):
         n_prev: int = 4,
         merge_view_into_width: bool = False,
         postprocess_video: bool = True,
-        show_progress: bool = True,
+        show_progress: bool = False,
         **kwargs,
     ):
         r"""
