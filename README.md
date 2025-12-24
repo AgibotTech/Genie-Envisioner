@@ -18,7 +18,7 @@ This repo is the official implementation of Genie Envisioner: A Unified World Fo
 
 - [2025.12.18] 📚️ The [weights of GE-Act trained on Calvin](https://www.modelscope.cn/models/agibot_world/Genie-Envisioner/file/view/master/ge_act_calvin.safetensors) is released.
 
-- [2025.12.18] 📚️ The [instruction](https://github.com/AgibotTech/Genie-Envisioner/blob/master/experiments/RUN_LIBERO.md) for evaluating GE-Act on LIBERO is released.
+- [2025.12.18] 📚️ The [instruction](https://github.com/AgibotTech/Genie-Envisioner/blob/master/experiments/RUN.md) for evaluating GE-Act on Simulation Bench吧 is released.
 
 - [2025.10.22] 🚀 Pretrained Weights of [GE-Sim(Cosmos2-based version)](https://modelscope.cn/models/agibot_world/Genie-Envisioner/file/view/master/ge_sim_cosmos_v0.1.safetensors) have been released. The released GE-Sim model is pretrained on [AgiBotWorld](https://huggingface.co/datasets/agibot-world/AgiBotWorld-Beta).
  
