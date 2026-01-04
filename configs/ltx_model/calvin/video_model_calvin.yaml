@@ -24,9 +24,9 @@ pipeline_class_path: models/pipeline/custom_pipeline.py
 pipeline_class: CustomPipeline
 
 # 
-return_action: true
-return_video: false
-train_mode: 'action_full'
+return_action: false
+return_video: true
+train_mode: 'video_only'
 action_loss_scale: 1.0
 
 # total training step is decided by the minimum of the below two
@@ -34,7 +34,7 @@ train_steps: 1000000
 train_epochs: 10000
 steps_to_save: 10000
 steps_to_log: 20
-steps_to_val: 1000000000
+steps_to_val: 2000
 
 mixed_precision: bf16
 allow_tf32: False
@@ -47,8 +47,7 @@ seed: 42
 enable_slicing: True
 enable_tiling: True
 
-add_state: True
-rand_init_action: True
+add_state: False
 
 caption_dropout_p: 0.0
 
@@ -58,11 +57,11 @@ dataloader_num_workers: 8
 pin_memory: True
 
 gradient_checkpointing: True
-noise_to_first_frame: 0.01
+noise_to_first_frame: 0.1
 
 # Optimizer Config
 optimizer: adamw
-lr: 5e-5
+lr: 3e-4
 beta1: 0.9
 beta2: 0.95
 beta3: 0.999
@@ -93,7 +92,7 @@ reinit_view_emb: False
 pixel_wise_timestep: True
 
 diffusion_model:
-  model_path: PATH/TO/GE_ACT/TRAINED_ON_LIBERO_DATASET.SAFETENSOR
+  model_path: PATH_TO_ANY_CHECKPOINT_SAFETENSOR
   config:
     activation_fn: gelu-approximate
     attention_bias: true
@@ -110,11 +109,7 @@ diffusion_model:
     patch_size: 1
     patch_size_t: 1
     qk_norm: rms_norm_across_heads
-    action_expert: true
-    action_in_channels: 22
-    action_out_channels: 22
-    action_num_attention_heads: 16
-    action_attention_head_dim: 32
+    action_expert: false
 
 data:
 ### more details can be found in data/utils/*_dataset.py
@@ -135,7 +130,7 @@ data:
     stat_file: configs/ltx_model/calvin/stats_calvin_rel.json
     state_key: observation.state
     action_key: relative_action
-    ignore_seek: True
+    ignore_seek: False
   val:
     data_roots: ["path/to/calvin_lerobot_dataset"]
     domains: ["calvin", ]
@@ -153,12 +148,12 @@ data:
     stat_file: configs/ltx_model/calvin/stats_calvin_rel.json
     state_key: observation.state
     action_key: relative_action
-    ignore_seek: True
+    ignore_seek: False
 
 
 use_color_jitter: true
 num_inference_step: 10
-noisy_video: true
+noisy_video: false
 
 # false for quick debug, for training set True
 load_weights: true
