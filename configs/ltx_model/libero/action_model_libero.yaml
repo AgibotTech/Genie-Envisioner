@@ -1,12 +1,14 @@
+resume_from_path: /shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_13_19_53_44/step_110000
+
+### experiment name
 model_name: 'ltx_train'
 is_i2v: True
 report_to: None
 tracker_name: ltx_trainer
 
 logging_dir: logs
-output_dir: PATH_TO_SAVE_LOGS_AND_CHECKPOINTS
-pretrained_model_name_or_path: PATH_TO_PRETRAINED_WEIGHTS_OF_VAE_AND_TOKENIZER
-
+output_dir: output
+pretrained_model_name_or_path: /shared_work/physical_intelligence/LTX-Video
 
 ###
 train_data_class_path: data/libero_dataset.py
@@ -97,7 +99,8 @@ flow_mode_scale: 1.29
 pixel_wise_timestep: True
 
 diffusion_model:
-  model_path: PATH/TO/GE_ACT/TRAINED_ON_LIBERO_DATASET.SAFETENSOR
+  # model_path: /shared_work/physical_intelligence/ge_weights/GE_base_fast_v0.1.safetensors
+  model_path: /shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_07_20_29_30/step_260000/diffusion_pytorch_model.safetensors
   config:
     activation_fn: gelu-approximate
     attention_bias: true
@@ -124,7 +127,7 @@ diffusion_model:
 
 data:
   train:
-    data_roots: ["path/to/single_split_libero_dataset"]
+    data_roots: ["/shared_work/physical_intelligence/sajjad/.cache/huggingface/hub/datasets--physical-intelligence--libero/snapshots/a4336d589d589045d1c56423ffdf3b88a0e19b1f"]
     domains: ["libero"]
     sample_size: [256, 256]
     sample_n_frames: 500
@@ -143,7 +146,7 @@ data:
     action_key: actions
     extra_parquet_index: False
   val:
-    data_roots: ["path/to/single_split_libero_dataset"]
+    data_roots: ["/shared_work/physical_intelligence/sajjad/.cache/huggingface/hub/datasets--physical-intelligence--libero/snapshots/a4336d589d589045d1c56423ffdf3b88a0e19b1f"]
     domains: ["libero"]
     sample_size: [256, 256]
     sample_n_frames: 500
