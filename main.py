@@ -14,6 +14,7 @@ def main():
     parser.add_argument('--runner_class', type=str, default="Trainer")
     parser.add_argument('--mode', type=str, default="train")
     parser.add_argument('--checkpoint_path', type=str, default=None, help='Path to trained checkpoint, used in inference stage only')
+    parser.add_argument('--resume_from_path', type=str, default=None, help='Path to folder for resuming training')
     parser.add_argument('--n_validation', type=int, default=1, help='num of samples to predict, used in inference stage only')
     parser.add_argument('--n_chunk_action', type=int, default=1, help='num of action chunks to predict, used in action inference stage only')
     parser.add_argument('--output_path', type=str, default=None, help='Path to save outputs, used in inference stage only')
