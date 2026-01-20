@@ -2,15 +2,21 @@
 
 gpu=${1:-0}
 
-config_file=configs/ltx_model_libero/action_model_libero_goal_pdstate.yaml
+config_file=configs/ltx_model/libero/action_model_libero.yaml
 
 output_dir=evaluation_results/libero
 
-ckpt_path_goal=PATH/TO/TRAINED/LIBERO_GOAL_CHECKPOINT.safetensor
-ckpt_path_obj=PATH/TO/TRAINED/LIBERO_OBJECT_CHECKPOINT.safetensor
-ckpt_path_10=PATH/TO/TRAINED/LIBERO_10_CHECKPOINT.safetensor
-ckpt_path_spa=PATH/TO/TRAINED/LIBERO_SPATIAL_CHECKPOINT.safetensor
+# base line checkpoints
+# ckpt_path_goal=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/Genie-Envisioner/ge_act_libero_goal.safetensors
+# ckpt_path_10=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/Genie-Envisioner/ge_act_libero_10.safetensors
+# ckpt_path_obj=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/Genie-Envisioner/ge_act_libero_object.safetensors
+# ckpt_path_spa=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/Genie-Envisioner/ge_act_libero_spatial.safetensors
 
+# no video adaption and trained on full data sinel checkpoint - Sajjad
+ckpt_path_goal=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_13_19_53_44/step_110000/diffusion_pytorch_model.safetensors
+ckpt_path_10=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_13_19_53_44/step_110000/diffusion_pytorch_model.safetensors
+ckpt_path_obj=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_13_19_53_44/step_110000/diffusion_pytorch_model.safetensors
+ckpt_path_spa=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_13_19_53_44/step_110000/diffusion_pytorch_model.safetensors
 
 EGL_DEVICE_ID=$gpu python  experiments/eval_libero.py \
     --config_file $config_file \
@@ -27,7 +33,7 @@ EGL_DEVICE_ID=$gpu python  experiments/eval_libero.py \
     --config_file $config_file \
     --output_dir  $output_dir \
     --ckpt_path $ckpt_path_10 \
-    --exec_step $exec_step \
+    --exec_step 8 \
     --task_suite_name  libero_10 \
     --device $gpu \
     --num_trails_per_task 50 \
@@ -38,7 +44,7 @@ EGL_DEVICE_ID=$gpu python  experiments/eval_libero.py \
     --config_file $config_file \
     --output_dir  $output_dir \
     --ckpt_path $ckpt_path_obj \
-    --exec_step $exec_step \
+    --exec_step 8 \
     --task_suite_name  libero_object \
     --device $gpu \
     --num_trails_per_task 50 \
@@ -48,7 +54,7 @@ EGL_DEVICE_ID=$gpu python  experiments/eval_libero.py \
     --config_file $config_file \
     --output_dir  $output_dir \
     --ckpt_path $ckpt_path_spa \
-    --exec_step $exec_step \
+    --exec_step 8 \
     --task_suite_name  libero_spatial \
     --device $gpu \
     --num_trails_per_task 50 \
