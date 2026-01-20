@@ -47,6 +47,7 @@ from utils.model_utils import load_condition_models, load_latent_models, load_va
 from utils.model_utils import forward_pass
 from utils.optimizer_utils import get_optimizer
 from utils.memory_utils import get_memory_statistics, free_memory
+from utils.training_state import save_training_state, load_training_state
 
 # ----------------------------------------------------
 from torch.utils.tensorboard import SummaryWriter
@@ -494,6 +495,54 @@ class Trainer:
         global_step = 0
         first_epoch = 0
         initial_global_step = 0
+        
+        # Resume from checkpoint if specified in config
+        if getattr(self.args, 'resume_from_path', None) is not None and os.path.exists(self.args.resume_from_path):
+            logger.info(f"\n{'*'*70}")
+            logger.info(f"[RESUME] Resuming training from checkpoint: {self.args.resume_from_path}")
+            logger.info(f"{'*'*70}\n")
+            try:
+                # Store optimizer state before loading for comparison
+                old_lr = None
+                if hasattr(self.lr_scheduler, 'get_last_lr'):
+                    try:
+                        old_lr = self.lr_scheduler.get_last_lr()
+                    except:
+                        pass
+                
+                global_step, first_epoch = load_training_state(
+                    self.state.accelerator, self.optimizer, self.lr_scheduler, self.args.resume_from_path
+                )
+                initial_global_step = global_step
+                first_epoch = first_epoch  # Will resume from next epoch after current
+                
+                # Verify loaded state
+                logger.info(f"\n[RESUME-VERIFY] Training state verification:")
+                logger.info(f"[RESUME-VERIFY] ✓ Global step loaded: {global_step}")
+                logger.info(f"[RESUME-VERIFY] ✓ First epoch loaded: {first_epoch}")
+                
+                # Verify optimizer state
+                new_lr = None
+                if hasattr(self.lr_scheduler, 'get_last_lr'):
+                    try:
+                        new_lr = self.lr_scheduler.get_last_lr()
+                        logger.info(f"[RESUME-VERIFY] ✓ Scheduler learning rate: {new_lr}")
+                    except:
+                        pass
+                
+                # Check optimizer parameter groups
+                if len(self.optimizer.param_groups) > 0:
+                    for i, pg in enumerate(self.optimizer.param_groups):
+                        logger.info(f"[RESUME-VERIFY] ✓ Param group {i}: lr={pg.get('lr', 'N/A')}, "
+                              f"weight_decay={pg.get('weight_decay', 'N/A')}")
+                
+                logger.info(f"[RESUME-VERIFY] ✓ All state loaded successfully!\n")
+                logger.info(f"Resumed from global_step={global_step}, epoch={first_epoch}")
+            except Exception as e:
+                logger.error(f"\n[RESUME-ERROR] ✗ Failed to load training state: {e}\n")
+                logger.warning(f"Failed to load training state from {self.args.resume_from_path}: {e}")
+                logger.warning("Starting training from scratch")
+        
         progress_bar = tqdm(
             range(0, self.state.train_steps),
             initial=initial_global_step,
@@ -511,9 +560,25 @@ class Trainer:
 
         # loss spikes
         anomalies = []
+        
+        # Log initial state before training loop
+        logger.info(f"\n{'='*70}")
+        logger.info(f"[TRAINING-START] Starting training loop")
+        logger.info(f"[TRAINING-START] Initial global step: {global_step}")
+        logger.info(f"[TRAINING-START] Starting epoch: {first_epoch}")
+        logger.info(f"[TRAINING-START] Total epochs: {self.state.train_epochs}")
+        logger.info(f"[TRAINING-START] Total steps: {self.state.train_steps}")
+        logger.info(f"[TRAINING-START] Weight dtype: {weight_dtype}")
+        logger.info(f"[TRAINING-START] Device: {accelerator.device}")
+        logger.info(f"{'='*70}\n")
 
         for epoch in range(first_epoch, self.state.train_epochs):
             logger.debug(f"Starting epoch ({epoch + 1}/{self.state.train_epochs})")
+            
+            # Log epoch start with current global step
+            if epoch == first_epoch and global_step > 0:
+                logger.info(f"\n[EPOCH-{epoch}] Starting epoch {epoch + 1}/{self.state.train_epochs}")
+                logger.info(f"[EPOCH-{epoch}] Resuming with global_step={global_step}")
 
             self.diffusion_model.train()
 
@@ -749,6 +814,13 @@ class Trainer:
 
                         model_save_dir = os.path.join(self.save_folder,f'step_{global_step}')
                         model_to_save.save_pretrained(model_save_dir, safe_serialization=True)
+                        
+                        # Save training state for resuming
+                        save_training_state(
+                            accelerator, self.optimizer, self.lr_scheduler, 
+                            global_step, epoch, model_save_dir
+                        )
+                        
                         del  model_to_save
                         
             memory_statistics = get_memory_statistics()
@@ -771,6 +843,12 @@ class Trainer:
 
             model_save_dir = os.path.join(self.save_folder,f'step_{global_step}')
             self.diffusion_model.save_pretrained(model_save_dir, safe_serialization=True)
+            
+            # Save final training state
+            save_training_state(
+                accelerator, self.optimizer, self.lr_scheduler, 
+                global_step, epoch, model_save_dir
+            )
 
         del self.diffusion_model, self.scheduler
         free_memory()
