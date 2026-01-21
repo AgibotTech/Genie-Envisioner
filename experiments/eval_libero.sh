@@ -12,11 +12,11 @@ output_dir=evaluation_results/libero
 # ckpt_path_obj=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/Genie-Envisioner/ge_act_libero_object.safetensors
 # ckpt_path_spa=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/Genie-Envisioner/ge_act_libero_spatial.safetensors
 
-# no video adaption and trained on full data sinel checkpoint - Sajjad
-ckpt_path_goal=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_13_19_53_44/step_110000/diffusion_pytorch_model.safetensors
-ckpt_path_10=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_13_19_53_44/step_110000/diffusion_pytorch_model.safetensors
-ckpt_path_obj=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_13_19_53_44/step_110000/diffusion_pytorch_model.safetensors
-ckpt_path_spa=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_13_19_53_44/step_110000/diffusion_pytorch_model.safetensors
+# no ltx adaptation @ 260K steps
+ckpt_path_goal=/pm/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_07_20_29_30/step_260000/diffusion_pytorch_model.safetensors
+ckpt_path_10=/pm/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_07_20_29_30/step_260000/diffusion_pytorch_model.safetensors
+ckpt_path_obj=/pm/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_07_20_29_30/step_260000/diffusion_pytorch_model.safetensors
+ckpt_path_spa=/pm/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_07_20_29_30/step_260000/diffusion_pytorch_model.safetensors
 
 EGL_DEVICE_ID=$gpu python  experiments/eval_libero.py \
     --config_file $config_file \
