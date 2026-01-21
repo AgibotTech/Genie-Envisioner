@@ -1,16 +1,15 @@
 #!/bin/bash -l
-#SBATCH --job-name=genie-eval-libero
+#SBATCH --job-name=GE-eval-libero
 #SBATCH --partition=compute                
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1
 #SBATCH --time=99:00:00
-#SBATCH --output=/shared_work/physical_intelligence/sajjad/slurm-logs/%x-%j.out
-#SBATCH --error=/shared_work/physical_intelligence/sajjad/slurm-logs/%x-%j.err
+#SBATCH --output=/pm/physical_intelligence/sajjad/slurm-logs/%x-%j.out
+#SBATCH --error=/pm/physical_intelligence/sajjad/slurm-logs/%x-%j.err
 #SBATCH --cpus-per-task=32
 #SBATCH --mem=128G
-#SBATCH --chdir=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner
-
+#SBATCH --chdir=/pm/physical_intelligence/sajjad/projects/Genie-Envisioner
 # --- 0. Pre-emptive Fixes (Silence Cluster Noise) ---
 # Silence the /etc/profile.d/modules.sh error
 exec 2> >(grep -v "/etc/profile.d/modules.sh" >&2)
@@ -18,7 +17,6 @@ exec 2> >(grep -v "/etc/profile.d/modules.sh" >&2)
 mkdir -p /home/sajjad/.triton/autotune
 
 # Exit on error, treat unset variables as error
-set -euo pipefail
 
 echo "================================================================"
 echo "JOB START: $(date)"
@@ -39,6 +37,7 @@ rm -rf "$SITE_PACKAGES"/~* || true
 
 # --- 2. Conda Initialization & Activation ---
 echo "Loading Conda module..."
+module load conda/new || { echo "ERROR: Failed to load conda module" >&2; exit 1; }
 module load conda/new || { echo "ERROR: Failed to load conda module" >&2; exit 1; }
 
 # Sourcing the profile is mandatory for 'conda activate' to work inside SLURM scripts
