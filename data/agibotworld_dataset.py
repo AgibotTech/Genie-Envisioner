@@ -296,6 +296,9 @@ class AgiBotWorld(Dataset):
             action = torch.FloatTensor(action)
             action = (action - act_meanv) / act_stdv
             rel_action = action - state
+            ### keep current effector action
+            rel_action[:, 6] = action[:, 6]
+            rel_action[:, 13] = action[:, 13]
             return rel_action, state
 
         else:

@@ -464,6 +464,9 @@ class CustomLeRobotDataset(Dataset):
             action = torch.FloatTensor(action_curr)
             action = (action - action_mean) / action_std
             rel_action = action - state
+            ### keep current effector action
+            rel_action[:, 6] = action[:, 6]
+            rel_action[:, 13] = action[:, 13]
             action = rel_action
 
         else:

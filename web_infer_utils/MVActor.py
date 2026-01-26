@@ -342,7 +342,7 @@ class MVActor:
         ### original state: 1,1,C
         state = torch.from_numpy(state).unsqueeze(dim=0).unsqueeze(dim=0)
 
-        ### for dual-arm
+        ### for dual-arm only
         gripper_dim = self.gripper_dim
         arm_dim = (self.action_dim - 2*self.gripper_dim)//2
 
@@ -378,7 +378,6 @@ class MVActor:
             ### rel_act = norm(act) - norm(state)
             ### infer:
             ### denorm(output + norm(state))
-
             final_actions_pred = actions_pred[:, :execution_step, :]
             if self.norm_type == "meanstd":
                 sta_mean = torch.from_numpy(self.sta_mean).unsqueeze(dim=0).unsqueeze(dim=0)
@@ -388,6 +387,7 @@ class MVActor:
                 sta_min = torch.from_numpy(self.sta_min).unsqueeze(dim=0).unsqueeze(dim=0)
                 sta_max = torch.from_numpy(self.sta_max).unsqueeze(dim=0).unsqueeze(dim=0)
                 normed_state = (state[:,:,:ndim_action]-sta_min[:,:,:ndim_action])/(sta_max[:,:,:ndim_action]-sta_min[:,:,:ndim_action]+1e-6)
+                normed_state = normed_state * 2 - 1.0
             final_actions_pred[:, :, :arm_dim] = final_actions_pred[:, :, :arm_dim] + normed_state[:, :, :arm_dim]
             final_actions_pred[:, :, arm_dim+gripper_dim:2*arm_dim+gripper_dim] = final_actions_pred[:, :, arm_dim+gripper_dim:2*arm_dim+gripper_dim] + normed_state[:, :, arm_dim+gripper_dim:2*arm_dim+gripper_dim]
             
