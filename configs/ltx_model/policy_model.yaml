@@ -53,7 +53,7 @@ seed: 42
 enable_slicing: True
 enable_tiling: True
 
-add_state: False ### whether add state to the action chunk
+add_state: True ### whether add state to the action chunk
 
 caption_dropout_p: 0.06
 
