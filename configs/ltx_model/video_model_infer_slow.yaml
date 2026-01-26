@@ -4,8 +4,8 @@ report_to: None
 tracker_name: ltx_trainer
 
 logging_dir: logs
-output_dir: PATH_TO_SAVE_LOGS_AND_CHECKPOINTS
-pretrained_model_name_or_path: PATH_TO_PRETRAINED_WEIGHTS_OF_VAE_AND_TOKENIZER
+output_dir: output
+pretrained_model_name_or_path: /shared_work/physical_intelligence/LTX-Video
 
 ###
 train_data_class_path: data/agibotworld_dataset.py
@@ -95,7 +95,7 @@ flow_mode_scale: 1.29
 pixel_wise_timestep: True
 
 diffusion_model:
-  model_path: PATH_TO_CHECKPOINT_SAFETENSOR
+  model_path: /shared_work/physical_intelligence/ge_weights/ge_base_slow_v0.1.safetensors
   config:
     activation_fn: gelu-approximate
     attention_bias: true
