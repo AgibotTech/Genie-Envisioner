@@ -1,16 +1,15 @@
 #!/bin/bash -l
-#SBATCH --job-name=GE-fast-b1k
+#SBATCH --job-name=GEAct-fast-b1k
 #SBATCH --partition=compute                
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1
-#SBATCH --time=7-00:00:00
-#SBATCH --output=/shared_work/physical_intelligence/sajjad/slurm-logs/%x-%j.out
-#SBATCH --error=/shared_work/physical_intelligence/sajjad/slurm-logs/%x-%j.err
+#SBATCH --time=07-00:00:00
+#SBATCH --output=/pm/physical_intelligence/sajjad/slurm-logs/%x-%j.out
+#SBATCH --error=/pm/physical_intelligence/sajjad/slurm-logs/%x-%j.err
 #SBATCH --cpus-per-task=32
 #SBATCH --mem=128G
-#SBATCH --chdir=/shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner
-
+#SBATCH --chdir=/pm/physical_intelligence/sajjad/projects/Genie-Envisioner
 # --- 0. Pre-emptive Fixes (Silence Cluster Noise) ---
 # Silence the /etc/profile.d/modules.sh error
 exec 2> >(grep -v "/etc/profile.d/modules.sh" >&2)
@@ -18,7 +17,6 @@ exec 2> >(grep -v "/etc/profile.d/modules.sh" >&2)
 mkdir -p /home/sajjad/.triton/autotune
 
 # Exit on error, treat unset variables as error
-set -euo pipefail
 
 echo "================================================================"
 echo "JOB START: $(date)"
@@ -39,6 +37,7 @@ rm -rf "$SITE_PACKAGES"/~* || true
 
 # --- 2. Conda Initialization & Activation ---
 echo "Loading Conda module..."
+module load conda/new || { echo "ERROR: Failed to load conda module" >&2; exit 1; }
 module load conda/new || { echo "ERROR: Failed to load conda module" >&2; exit 1; }
 
 # Sourcing the profile is mandatory for 'conda activate' to work inside SLURM scripts
@@ -78,8 +77,8 @@ print(f'SUCCESS: Libero loaded from {libero.__file__}')
 
 # --- 5. Sanity Check: GPU Visibility ---
 echo "Checking GPU availability..."
-python -c "import torch; dev_count = torch.cuda.device_count(); print(f'Torch sees {dev_count} GPUs'); exit(0 if dev_count >= 1 else 1)" || { 
-    echo "ERROR: GPU mismatch. Expected at least 1, saw $(python -c 'import torch; print(torch.cuda.device_count())')" >&2
+python -c "import torch; dev_count = torch.cuda.device_count(); print(f'Torch sees {dev_count} GPUs'); exit(0 if dev_count == 1 else 1)" || { 
+    echo "ERROR: GPU mismatch. Expected 1, saw $(python -c 'import torch; print(torch.cuda.device_count())')" >&2
     exit 1 
 }
 
@@ -96,7 +95,8 @@ export MASTER_PORT=$(shuf -i 20000-60000 -n 1)
 echo "Using Master Port: $MASTER_PORT"
 
 # adapt video model
-bash scripts/train.sh main.py configs/ltx_model/behavior/video_model_behavior.yaml
+# bash scripts/train.sh main.py configs/ltx_model/b1k/video_model_b1k.yaml
+bash scripts/train.sh main.py configs/ltx_model/b1k/action_model_b1k.yaml
 # fine-tune action model
 # bash scripts/train.sh main.py configs/ltx_model/behavior/action_model_behavior.yaml
 # bash scripts/train.sh main.py configs/ltx_model/behavior/action_model_wa_behavior.yaml
