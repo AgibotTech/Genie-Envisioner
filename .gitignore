@@ -37,6 +37,7 @@ htmlcov/
 .coverage
 .coverage.*
 .cache
+cache/
 nosetests.xml
 coverage.xml
 *.cover
@@ -173,5 +174,6 @@ valid/*
 # custom_configs/
 logs/
 output/
+outputs/
 evaluation_results/
 evaluation_results/*

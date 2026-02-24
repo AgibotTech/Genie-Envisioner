@@ -5,13 +5,13 @@ tracker_name: ltx_trainer
 
 logging_dir: logs
 output_dir: output
-pretrained_model_name_or_path: /shared_work/physical_intelligence/LTX-Video
+pretrained_model_name_or_path: /pm/physical_intelligence/LTX-Video
 
 ###
-train_data_class_path: data/libero_dataset.py
-train_data_class: CustomLeRobotDataset
-val_data_class_path: data/libero_dataset.py
-val_data_class: CustomLeRobotDataset
+train_data_class_path: data/b1k_dataset.py
+train_data_class: B1KDataset
+val_data_class_path: data/b1k_dataset.py
+val_data_class: B1KDataset
 
 ### 
 tokenizer_class_path: transformers
@@ -37,7 +37,7 @@ action_loss_scale: 1.0
 # total training step is decided by the minimum of the below two
 train_steps: 1000000
 train_epochs: 10000
-steps_to_save: 10000
+steps_to_save: 2000
 steps_to_log: 20
 steps_to_val: 2000
 
@@ -52,12 +52,12 @@ seed: 42
 enable_slicing: True
 enable_tiling: True
 
-add_state: False
+add_state: False ### whether add state to the action chunk
 
 caption_dropout_p: 0.06
 
 # dataloader
-batch_size: 16
+batch_size: 8
 dataloader_num_workers: 8
 pin_memory: True
 
@@ -66,7 +66,7 @@ noise_to_first_frame: 0.1
 
 # Optimizer Config
 optimizer: adamw
-lr: 3e-4
+lr: 3e-5
 beta1: 0.9
 beta2: 0.95
 beta3: 0.999
@@ -113,50 +113,55 @@ diffusion_model:
     patch_size_t: 1
     qk_norm: rms_norm_across_heads
     action_expert: false
+    action_in_channels: 14
+    action_num_attention_heads: 16
+    action_attention_head_dim: 32
 
 data:
+### more details can be found in data/utils/*_dataset.py
   train:
-    data_roots: ["/shared_work/physical_intelligence/sajjad/.cache/huggingface/hub/datasets--physical-intelligence--libero/snapshots/a4336d589d589045d1c56423ffdf3b88a0e19b1f"]
-    domains: ["libero"]
+    data_roots: ["/pm/physical_intelligence/2025-challenge-demos"]
+    domains: []
     sample_size: [256, 256]
-    sample_n_frames: 500
+    sample_n_frames: 900
     preprocess :  'resize'
-    valid_cam :  ['image', 'wrist_image']
+    valid_cam :  ['observation.images.rgb.head', 'observation.images.rgb.left_wrist', 'observation.images.rgb.right_wrist']
     chunk: 9
-    action_chunk: 36
+    action_chunk: 54
     n_previous: 4
     previous_pick_mode: 'random'
     random_crop: False
     ignore_seek: False
     action_type: "absolute"
-    action_space: "eef"
-    stat_file: configs/ltx_model/libero/libero_all.json
-    state_key: state
+    action_space: "joint"
     action_key: actions
+    state_key: state
+    stat_file: configs/ltx_model/behavior/behavior_all.json
     extra_parquet_index: False
   val:
-    data_roots: ["/shared_work/physical_intelligence/sajjad/.cache/huggingface/hub/datasets--physical-intelligence--libero/snapshots/a4336d589d589045d1c56423ffdf3b88a0e19b1f"]
-    domains: ["libero"]
+    data_roots: ["/pm/physical_intelligence/2025-challenge-demos"]
+    domains: []
     sample_size: [256, 256]
-    sample_n_frames: 500
+    sample_n_frames: 900
     preprocess :  'resize'
-    valid_cam : ['image', 'wrist_image']
+    valid_cam :  ['observation.images.rgb.head', 'observation.images.rgb.left_wrist', 'observation.images.rgb.right_wrist']
     chunk: 9
-    action_chunk: 36
+    action_chunk: 54
     n_previous: 4
     previous_pick_mode: 'random'
     random_crop: False
     ignore_seek: False
     action_type: "absolute"
-    action_space: "eef"
-    stat_file: configs/ltx_model/libero/libero_all.json
-    state_key: state
+    action_space: "joint"
     action_key: actions
+    state_key: state
+    stat_file: configs/ltx_model/behavior/behavior_all.json
     extra_parquet_index: False
 
+
 use_color_jitter: true
-num_inference_step: 10
-noisy_video: false
+num_inference_step: 5
+noisy_video: true
 
 # false for quick debug, for training set True
 load_weights: true
