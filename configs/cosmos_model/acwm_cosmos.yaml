@@ -59,7 +59,7 @@ diffusion_model:
   model_path: LOCAL_PATH/TO/ge_sim_cosmos_v0.1.safetensors
 
   config:
-    in_channels: 26  # 16 (vae) + 3 (traj) + 6 (raymap) + 1 (padding mask)
+    in_channels: 26  # 16 (vae) + 3 (traj) + 6 (raymap) + 1 (condition mask); padding_mask is appended inside the transformer
     out_channels: 16
     num_attention_heads: 16
     attention_head_dim: 128

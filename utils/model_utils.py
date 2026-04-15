@@ -7,7 +7,10 @@ import torch
 import torch.nn as nn
 from accelerate import Accelerator
 from diffusers.utils.torch_utils import is_compiled_module
+from einops import rearrange
 from safetensors.torch import save_model, load_file, save_file
+
+from utils.geometry_utils import resize_traj_and_ray
 
 
 def unwrap_model(accelerator: Accelerator, model):
@@ -160,6 +163,16 @@ def load_vae_models(model_cls, model_dir, load_weights=True):
     return model
 
 
+def compute_total_latent_frames(mem_size, future_video_latents):
+    if future_video_latents.ndim < 3:
+        raise ValueError("future_video_latents must include a latent-frame axis.")
+    return mem_size + future_video_latents.shape[2]
+
+
+def build_gesim_pipeline(pipeline_class, *, text_encoder, tokenizer, transformer, vae, scheduler):
+    return pipeline_class(text_encoder, tokenizer, transformer, vae, scheduler)
+
+
 def forward_pass(
     model,
     prompt_embeds: torch.Tensor,
@@ -177,6 +190,40 @@ def forward_pass(
 ) -> torch.Tensor:
     latent_frame_rate = frame_rate / temporal_compression_ratio
     rope_interpolation_scale = [1 / latent_frame_rate, spatial_compression_ratio, spatial_compression_ratio]
+
+    cond_to_concat = kwargs.pop("cond_to_concat", None)
+    n_prev = kwargs.get("n_prev")
+    condition_mask = kwargs.get("condition_mask")
+
+    if cond_to_concat is not None:
+        if n_prev is None:
+            raise ValueError("n_prev is required when cond_to_concat is provided.")
+
+        if cond_to_concat.ndim == 6:
+            cond_to_concat = rearrange(cond_to_concat, "b c v t h w -> (b v) c t h w")
+        elif cond_to_concat.ndim != 5:
+            raise ValueError(f"Unsupported cond_to_concat shape: {cond_to_concat.shape}")
+
+        if noisy_latents.ndim != 3:
+            raise ValueError("Geometry-conditioned training expects flattened noisy_latents.")
+
+        noisy_latents = rearrange(
+            noisy_latents,
+            "bv (t h w) c -> bv c t h w",
+            t=num_frames,
+            h=height,
+            w=width,
+        )
+        cond_to_concat = cond_to_concat.to(device=noisy_latents.device, dtype=noisy_latents.dtype)
+        cond_to_concat = resize_traj_and_ray(
+            cond_to_concat,
+            mem_size=n_prev,
+            future_size=num_frames - n_prev,
+            height=height,
+            width=width,
+        )
+        noisy_latents = torch.cat([noisy_latents, cond_to_concat], dim=1)
+        noisy_latents = rearrange(noisy_latents, "bv c t h w -> bv (t h w) c")
     
     denoised_latents = model(
         hidden_states=noisy_latents,
