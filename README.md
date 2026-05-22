@@ -1,4 +1,4 @@
-# Genie Envisioner: A Unified World Foundation Platform for Robotic Manipulation
+# Genie Envisioner 1.0: A Unified World Foundation Platform for Robotic Manipulation
 
 <div id="top" align="center">
 
