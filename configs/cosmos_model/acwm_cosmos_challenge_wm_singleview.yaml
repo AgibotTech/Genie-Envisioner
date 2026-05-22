@@ -1,0 +1,173 @@
+model_name: 'gesim_challenge_wm_train'
+is_i2v: True
+report_to: None
+tracker_name: gesim_challenge_wm_trainer
+
+logging_dir: logs
+output_dir: PATH_TO_SAVE_LOGS_AND_CHECKPOINTS
+pretrained_model_name_or_path: PATH_TO_PRETRAINED_WEIGHTS_OF_VAE_AND_TOKENIZER
+tokenizer_pretrained_model_name_or_path: PATH_TO_PRETRAINED_WEIGHTS_OF_VAE_AND_TOKENIZER
+
+###
+train_data_class_path: data/challenge_wm_dataset.py
+train_data_class: ChallengeWMDataset
+val_data_class_path: data/challenge_wm_dataset.py
+val_data_class: ChallengeWMDataset
+
+###
+tokenizer_class_path: transformers
+tokenizer_class: T5TokenizerFast
+textenc_class_path: transformers
+textenc_class: T5EncoderModel
+vae_class_path: models/cosmos_models/models/autoencoders/autoencoder_kl_wan.py
+vae_class: AutoencoderKLWan
+diffusion_model_class_path: models/cosmos_models/models/transformers/transformer_cosmos_multiview.py
+diffusion_model_class: MultiViewCosmosTransformer3DModel
+diffusion_scheduler_class_path: models/pipeline/gesim_cosmos2_pipeline_utils/scheduling_flow_match_euler_discrete.py
+diffusion_scheduler_class: FlowMatchEulerDiscreteScheduler
+
+pipeline_class_path: models/pipeline/gesim_pipeline.py
+pipeline_class: GeSimCosmos2Pipeline
+
+#
+return_action: false
+return_video: true
+train_mode: 'video_only'
+action_loss_scale: 1.0
+action_cond_mode: true
+use_geom_condition: true   # requires trainer to pass batch['cond_to_concat'] into GE-Sim forward
+geom_condition_key: cond_to_concat
+
+# total training step is decided by the minimum of the below two
+train_steps: 300000
+train_epochs: 10000
+steps_to_save: 5000
+steps_to_log: 20
+steps_to_val: 5000
+
+mixed_precision: bf16
+allow_tf32: False
+
+# timeout, seconds
+nccl_timeout: 600
+seed: 42
+
+# vae
+enable_slicing: True
+enable_tiling: True
+
+add_state: False
+
+caption_dropout_p: 0.0
+
+# dataloader
+batch_size: 2
+dataloader_num_workers: 4
+pin_memory: True
+
+gradient_checkpointing: True
+noise_to_first_frame: 0.0
+
+# Optimizer Config
+optimizer: adamw
+lr: 1e-5
+beta1: 0.9
+beta2: 0.95
+beta3: 0.999
+epsilon: 1e-8
+weight_decay: 1e-5
+optimizer_8bit: False
+optimizer_torchao: False
+scale_lr: False
+
+max_grad_norm: 1.0
+gradient_accumulation_steps: 1
+
+# lr_scheduler Config
+lr_scheduler: constant_with_warmup
+lr_warmup_steps: 1000
+lr_num_cycles: 1
+lr_power: 1.0
+
+# Timestep Config
+flow_weighting_scheme: none
+flow_logit_mean: 0.0
+flow_logit_std: 1.0
+flow_mode_scale: 1.29
+
+pixel_wise_timestep: False
+
+diffusion_model:
+  model_path: PATH_TO_GE_SIM_COSMOS_CHECKPOINT_SAFETENSOR
+  config:
+    in_channels: 26  # 16 (vae latent) + 3 (traj) + 6 (raymap) + 1 (condition mask); padding_mask is appended inside the transformer
+    out_channels: 16
+    num_attention_heads: 16
+    attention_head_dim: 128
+    num_layers: 28
+    mlp_ratio: 4.0
+    text_embed_dim: 1024
+    adaln_lora_dim: 256
+    max_size: [128, 240, 240]
+    patch_size: [1, 2, 2]
+    rope_scale: [1.0, 3.0, 3.0]
+    concat_padding_mask: true
+    extra_pos_embed_type: null
+    use_view_embed: true
+    action_expert: false
+    action_in_channels: 7
+    action_num_attention_heads: 16
+    action_attention_head_dim: 32
+    action_rope_dim: 32
+
+data:
+  train:
+    data_roots: ["path/to/AgiBotWorldChallenge-2026/WorldModel"]
+    domains: ["agibotworld"]
+    split: "train"
+    sample_size: [320, 512]
+    sample_n_frames: 64
+    preprocess: 'resize'
+    valid_cam: ['head']
+    chunk: 16
+    action_chunk: 16
+    n_previous: 4
+    previous_pick_mode: 'random'
+    random_crop: True
+    min_sep: 1
+    max_sep: 3
+    dataset_info_cache_path: null
+    use_unified_prompt: True
+    unified_prompt: "best quality, consistent and smooth motion, realistic, clear and distinct."
+    action_space: "eef"
+    normalize_actions: False
+  val:
+    data_roots: ["path/to/AgiBotWorldChallenge-2026/WorldModel"]
+    domains: ["agibotworld"]
+    split: "val"
+    sample_size: [320, 512]
+    sample_n_frames: 64
+    preprocess: 'resize'
+    valid_cam: ['head']
+    chunk: 16
+    action_chunk: 16
+    n_previous: 4
+    previous_pick_mode: 'random'
+    random_crop: False
+    min_sep: 1
+    max_sep: 1
+    dataset_info_cache_path: null
+    use_unified_prompt: True
+    unified_prompt: "best quality, consistent and smooth motion, realistic, clear and distinct."
+    action_space: "eef"
+    normalize_actions: False
+
+use_color_jitter: false
+num_inference_step: 15
+noisy_video: false
+
+# false for quick debug, true for initialization from released GE-Sim weights
+load_weights: true
+
+# current default is torchrun + accelerate DDP; multi-node is supported through scripts/train.sh
+use_deepspeed: false

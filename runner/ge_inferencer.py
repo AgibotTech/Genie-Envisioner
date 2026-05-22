@@ -29,7 +29,15 @@ from diffusers.training_utils import (
 )
 
 # ----------------------------------------------------
-from utils.model_utils import load_condition_models, load_latent_models, load_vae_models, load_diffusion_model, count_model_parameters, unwrap_model
+from utils.model_utils import (
+    build_gesim_pipeline,
+    count_model_parameters,
+    load_condition_models,
+    load_diffusion_model,
+    load_latent_models,
+    load_vae_models,
+    unwrap_model,
+)
 
 # ----------------------------------------------------
 from torch.utils.tensorboard import SummaryWriter
@@ -199,8 +207,13 @@ class Inferencer:
 
         os.makedirs(model_save_dir,exist_ok=True)
 
-        pipe = self.pipeline_class(
-            self.scheduler, self.vae, self.text_encoder, self.tokenizer, self.diffusion_model
+        pipe = build_gesim_pipeline(
+            self.pipeline_class,
+            text_encoder=self.text_encoder,
+            tokenizer=self.tokenizer,
+            transformer=self.diffusion_model,
+            vae=self.vae,
+            scheduler=self.scheduler,
         )
 
         assert(self.args.return_action | self.args.return_video)

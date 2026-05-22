@@ -43,7 +43,16 @@ from accelerate.utils import (
 )
 
 # ----------------------------------------------------
-from utils.model_utils import load_condition_models, load_latent_models, load_vae_models, load_diffusion_model, count_model_parameters, unwrap_model
+from utils.model_utils import (
+    build_gesim_pipeline,
+    compute_total_latent_frames,
+    count_model_parameters,
+    load_condition_models,
+    load_diffusion_model,
+    load_latent_models,
+    load_vae_models,
+    unwrap_model,
+)
 from utils.model_utils import forward_pass
 from utils.optimizer_utils import get_optimizer
 from utils.memory_utils import get_memory_statistics, free_memory
@@ -538,13 +547,21 @@ class Trainer:
                     mem = video[:,:,:mem_size]
                     future_video = video[:,:,mem_size:]
 
+                    geom_cond = None
+                    if getattr(self.args, "use_geom_condition", False):
+                        geom_condition_key = getattr(self.args, "geom_condition_key", "cond_to_concat")
+                        if geom_condition_key not in batch:
+                            raise KeyError(f"Missing geometry condition key in batch: {geom_condition_key}")
+                        geom_cond = batch[geom_condition_key].to(
+                            accelerator.device, dtype=weight_dtype
+                        ).contiguous()
+
                     if self.args.return_action:
                         future_video = future_video[:,:,:1].repeat(1,1,self.args.data['train']['chunk'],1,1)
 
                     # get the shape params
                     _, _, raw_frames, raw_height, raw_width = future_video.shape
 
-                    latent_frames = raw_frames // self.TEMPORAL_DOWN_RATIO + 1 + mem_size
                     latent_height = raw_height // self.SPATIAL_DOWN_RATIO
                     latent_width = raw_width // self.SPATIAL_DOWN_RATIO
 
@@ -558,6 +575,7 @@ class Trainer:
 
                     mem_latents = rearrange(mem_latents, '(b v m) (h w) c -> (b v) c m h w', b=batch_size, m=mem_size, h=latent_height)
                     future_video_latents = rearrange(future_video_latents, '(b v) (f h w) c -> (b v) c f h w',b=batch_size,h=latent_height,w=latent_width)
+                    latent_frames = compute_total_latent_frames(mem_size, future_video_latents)
                     latents = torch.cat((mem_latents, future_video_latents), dim=2)
 
                     video_attention_mask = None
@@ -664,6 +682,8 @@ class Trainer:
                         video_attention_mask=video_attention_mask,
                         history_action_state=act_state,
                         condition_mask=conditioning_mask,
+                        cond_to_concat=geom_cond,
+                        n_prev=mem_size,
                     )['latents']
 
                     if self.args.train_mode == 'all' or self.args.train_mode == 'video_only':
@@ -784,9 +804,13 @@ class Trainer:
 
         os.makedirs(model_save_dir,exist_ok=True)
 
-        pipe = self.pipeline_class(
-            self.scheduler, self.vae, self.text_encoder, self.tokenizer,
-            unwrap_model(accelerator, self.diffusion_model) if accelerator is not None else self.diffusion_model
+        pipe = build_gesim_pipeline(
+            self.pipeline_class,
+            text_encoder=self.text_encoder,
+            tokenizer=self.tokenizer,
+            transformer=unwrap_model(accelerator, self.diffusion_model) if accelerator is not None else self.diffusion_model,
+            vae=self.vae,
+            scheduler=self.scheduler,
         )
 
         batch = next(iter(self.val_dataloader))
@@ -802,6 +826,13 @@ class Trainer:
 
         image = rearrange(image, 'b c v t h w -> (b v) c t h w')
         num_denois_steps = self.args.num_inference_step
+        geom_cond = None
+        if getattr(self.args, "use_geom_condition", False):
+            geom_condition_key = getattr(self.args, "geom_condition_key", "cond_to_concat")
+            if geom_condition_key not in batch:
+                raise KeyError(f"Missing geometry condition key in validation batch: {geom_condition_key}")
+            geom_cond = batch[geom_condition_key][:batch_size].clone()
+            geom_cond = rearrange(geom_cond, 'b c v t h w -> (b v) c t h w')
 
         if self.args.return_action and getattr(self.args, "add_state", False):
             history_action_state = batch['state'][:batch_size]
@@ -811,35 +842,57 @@ class Trainer:
         else:
             history_action_state = None
 
-        preds = pipe.infer(
-            image=image,
-            prompt=prompt[:batch_size],
-            negative_prompt=negative_prompt,
-            num_inference_steps=num_denois_steps,
-            decode_timestep=0.03,
-            decode_noise_scale=0.025,
-            guidance_scale=1.0,
-            height=h,
-            width=w,
-            n_view=v,
-            return_action=self.args.return_action,
-            n_prev=self.args.data['train']['n_previous'],
-            chunk=(self.args.data['train']['chunk']-1)//self.TEMPORAL_DOWN_RATIO+1,
-            return_video=self.args.return_video,
-            noise_seed=42,
-            action_chunk=self.args.data['train']['action_chunk'],
-            history_action_state = history_action_state,
-            pixel_wise_timestep = self.args.pixel_wise_timestep,
-            n_chunk=n_chunk,
-            action_dim=self.args.diffusion_model["config"]["action_in_channels"] if self.args.return_action else None,
-        )[0]
+        if getattr(self.args, "use_geom_condition", False):
+            preds = pipe.infer(
+                video=image.permute(0, 2, 1, 3, 4),
+                cond_to_concat=geom_cond,
+                prompt=prompt[:batch_size],
+                negative_prompt=negative_prompt,
+                num_inference_steps=num_denois_steps,
+                guidance_scale=1.0,
+                height=h,
+                width=w,
+                n_view=v,
+                n_prev=self.args.data['train']['n_previous'],
+                num_frames=self.args.data['train']['chunk'],
+                merge_view_into_width=False,
+                output_type="pt",
+                postprocess_video=False,
+                show_progress=False,
+            )["frames"]
+        else:
+            preds = pipe.infer(
+                image=image,
+                prompt=prompt[:batch_size],
+                negative_prompt=negative_prompt,
+                num_inference_steps=num_denois_steps,
+                decode_timestep=0.03,
+                decode_noise_scale=0.025,
+                guidance_scale=1.0,
+                height=h,
+                width=w,
+                n_view=v,
+                return_action=self.args.return_action,
+                n_prev=self.args.data['train']['n_previous'],
+                chunk=(self.args.data['train']['chunk']-1)//self.TEMPORAL_DOWN_RATIO+1,
+                return_video=self.args.return_video,
+                noise_seed=42,
+                action_chunk=self.args.data['train']['action_chunk'],
+                history_action_state = history_action_state,
+                pixel_wise_timestep = self.args.pixel_wise_timestep,
+                n_chunk=n_chunk,
+                action_dim=self.args.diffusion_model["config"]["action_in_channels"] if self.args.return_action else None,
+            )[0]
 
         cap = 'Validation'
         fps = int(getattr(self.args, "basic_fps", 30) / (self.args.data['train']['action_chunk'] // self.args.data['train']['chunk']))
         save_video(rearrange(gt_video[0].data.cpu(), 'c v t h w -> c t h (v w)', v=n_view), os.path.join(model_save_dir, f'{cap}_gt.mp4'), fps=fps)
 
         if self.args.return_video:
-            video = preds['video'].data.cpu()
+            if getattr(self.args, "use_geom_condition", False):
+                video = preds.data.cpu()
+            else:
+                video = preds['video'].data.cpu()
             save_video(rearrange(video, '(b v) c t h w -> b c t h (v w)', v=n_view)[0], os.path.join(model_save_dir, f'{cap}.mp4'), fps=fps)
 
         if to_log:
@@ -860,4 +913,3 @@ class Trainer:
             if to_log:
                 for key, value in action_logs.items():
                     self.writer.add_scalar(key, value, global_step)
-
