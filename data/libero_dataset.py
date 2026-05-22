@@ -350,13 +350,17 @@ class CustomLeRobotDataset(Dataset):
 
     def transform_video(self, videos, specific_transforms_resize, intrinsics, sample_size):
         """
-        crop (optional) and resize the videos, and modify the intrinsic accordingly
+        Input 'videos' is now a LIST of tensors [C, T, H, W] with different H,W.
         """
-        c, v, t, h, w = videos.shape
+        # c, v, t, h, w = videos.shape <-- DELETE THIS (It causes the crash)
+        
         new_videos = []
         new_intrinsics = []
-        for iv in range(v):
-            video = videos[:, iv]
+        
+        # CHANGE 2: Iterate over the list directly
+        for iv, video in enumerate(videos):
+            # video = videos[:, iv] <-- DELETE THIS
+            
             if self.random_crop:
                 h_start, w_start, h_crop, w_crop = gen_crop_config(video)
                 video = video[:,:,h_start:h_start+h_crop,w_start:w_start+w_crop]
@@ -364,13 +368,17 @@ class CustomLeRobotDataset(Dataset):
                     intrinsic = intrin_crop_transform(intrinsics[iv], h_start, w_start)
                 
                 h, w = h_crop, w_crop
+            
             if intrinsics is not None:
                 intrinsic = intrinsic_transform(intrinsic, (h, w), sample_size, self.preprocess)
                 new_intrinsics.append(intrinsic)
                 
             video = specific_transforms_resize(video)
             new_videos.append(video)
+            
+        # CHANGE 3: Stack at the END, once sizes are uniform
         new_videos = torch.stack(new_videos, dim=1)
+        
         if len(new_intrinsics) > 0:
             new_intrinsics = torch.stack(new_intrinsics, dim=0)
         else:
@@ -499,9 +507,9 @@ class CustomLeRobotDataset(Dataset):
             video = torch.from_numpy(np.stack(video)).permute(3, 0, 1, 2).contiguous()
             video = video.float()/255.
             video_list.append(video)
-        videos = torch.stack(video_list, dim=1) 
+        # videos = torch.stack(video_list, dim=1) # do not stack here because different cams may have different image sizes
         videos, _ = self.transform_video(
-            videos, specific_transforms_resize, None, sample_size
+            video_list, specific_transforms_resize, None, sample_size
         )
         videos = self.normalize_video(videos, specific_transforms_norm)
 

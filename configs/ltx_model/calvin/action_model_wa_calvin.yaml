@@ -1,3 +1,5 @@
+
+### experiment name
 model_name: 'ltx_train'
 is_i2v: True
 report_to: None
@@ -5,13 +7,14 @@ tracker_name: ltx_trainer
 
 logging_dir: logs
 output_dir: output
-pretrained_model_name_or_path: /shared_work/physical_intelligence/LTX-Video
+pretrained_model_name_or_path: /pm/physical_intelligence/LTX-Video
 
 ###
 train_data_class_path: data/libero_dataset.py
 train_data_class: CustomLeRobotDataset
 val_data_class_path: data/libero_dataset.py
 val_data_class: CustomLeRobotDataset
+
 
 ### 
 tokenizer_class_path: transformers
@@ -29,9 +32,9 @@ pipeline_class_path: models/pipeline/custom_pipeline.py
 pipeline_class: CustomPipeline
 
 # 
-return_action: false
-return_video: true
-train_mode: 'video_only'
+return_action: true
+return_video: false
+train_mode: 'action_full'
 action_loss_scale: 1.0
 
 # total training step is decided by the minimum of the below two
@@ -39,7 +42,7 @@ train_steps: 1000000
 train_epochs: 10000
 steps_to_save: 10000
 steps_to_log: 20
-steps_to_val: 2000
+steps_to_val: 1000000000
 
 mixed_precision: bf16
 allow_tf32: False
@@ -52,9 +55,10 @@ seed: 42
 enable_slicing: True
 enable_tiling: True
 
-add_state: False
+add_state: True
+rand_init_action: True
 
-caption_dropout_p: 0.06
+caption_dropout_p: 0.0
 
 # dataloader
 batch_size: 16
@@ -62,11 +66,11 @@ dataloader_num_workers: 8
 pin_memory: True
 
 gradient_checkpointing: True
-noise_to_first_frame: 0.1
+noise_to_first_frame: 0.01
 
 # Optimizer Config
 optimizer: adamw
-lr: 3e-4
+lr: 5e-5
 beta1: 0.9
 beta2: 0.95
 beta3: 0.999
@@ -92,10 +96,12 @@ flow_logit_mean: 0.0
 flow_logit_std: 1.0
 flow_mode_scale: 1.29
 
+reinit_view_emb: False
+
 pixel_wise_timestep: True
 
 diffusion_model:
-  model_path: /pm/physical_intelligence/ge_weights/GE_base_fast_v0.1.safetensors
+  model_path: /pm/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_09_15_58_53/step_100000/diffusion_pytorch_model.safetensors
   config:
     activation_fn: gelu-approximate
     attention_bias: true
@@ -112,51 +118,56 @@ diffusion_model:
     patch_size: 1
     patch_size_t: 1
     qk_norm: rms_norm_across_heads
-    action_expert: false
+    action_expert: true
+    action_in_channels: 22
+    action_out_channels: 22
+    action_num_attention_heads: 16
+    action_attention_head_dim: 32
 
 data:
+### more details can be found in data/utils/*_dataset.py
   train:
-    data_roots: ["/shared_work/physical_intelligence/sajjad/.cache/huggingface/hub/datasets--physical-intelligence--libero/snapshots/a4336d589d589045d1c56423ffdf3b88a0e19b1f"]
-    domains: ["libero"]
+    data_roots: ["/pm/physical_intelligence/calvin"]
+    domains: ["calvin", ]
     sample_size: [256, 256]
-    sample_n_frames: 500
+    sample_n_frames: 100
     preprocess :  'resize'
-    valid_cam :  ['image', 'wrist_image']
+    valid_cam :  ['observation.images.top', 'observation.images.wrist']
     chunk: 9
-    action_chunk: 36
+    action_chunk: 54
     n_previous: 4
     previous_pick_mode: 'random'
-    random_crop: False
-    ignore_seek: False
+    random_crop: True
     action_type: "absolute"
     action_space: "eef"
-    stat_file: configs/ltx_model/libero/libero_all.json
-    state_key: state
-    action_key: actions
-    extra_parquet_index: False
+    stat_file: configs/ltx_model/calvin/stats_calvin_rel.json
+    # n_repeat: 5
+    state_key: observation.state
+    action_key: action
+    ignore_seek: True
   val:
-    data_roots: ["/shared_work/physical_intelligence/sajjad/.cache/huggingface/hub/datasets--physical-intelligence--libero/snapshots/a4336d589d589045d1c56423ffdf3b88a0e19b1f"]
-    domains: ["libero"]
+    data_roots: ["/pm/physical_intelligence/calvin"]
+    domains: ["calvin", ]
     sample_size: [256, 256]
-    sample_n_frames: 500
+    sample_n_frames: 100
     preprocess :  'resize'
-    valid_cam : ['image', 'wrist_image']
+    valid_cam :  ['observation.images.top', 'observation.images.wrist']
     chunk: 9
-    action_chunk: 36
+    action_chunk: 54
     n_previous: 4
     previous_pick_mode: 'random'
     random_crop: False
-    ignore_seek: False
     action_type: "absolute"
     action_space: "eef"
-    stat_file: configs/ltx_model/libero/libero_all.json
-    state_key: state
-    action_key: actions
-    extra_parquet_index: False
+    stat_file: configs/ltx_model/calvin/stats_calvin_rel.json
+    state_key: observation.state
+    action_key: action
+    ignore_seek: True
+
 
 use_color_jitter: true
 num_inference_step: 10
-noisy_video: false
+noisy_video: true
 
 # false for quick debug, for training set True
 load_weights: true

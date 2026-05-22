@@ -48,16 +48,10 @@
 
 ### Prepare Dataset
 
-1. Download LIBERO dataset from
+1. Download LIBERO dataset in LeRobot format.
     ```
-    https://huggingface.co/datasets/openvla/modified_libero_rlds
+    https://huggingface.co/datasets/physical-intelligence/libero
     ```
-
-2. Convert LIBERO Dataset to LEROBOT-format following
-    ```
-    https://github.com/Physical-Intelligence/openpi/blob/main/examples/libero/convert_libero_data_to_lerobot.py
-    ```
-
 
 ### Prepare action and state statistics
 
