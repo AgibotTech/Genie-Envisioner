@@ -860,4 +860,3 @@ class Trainer:
             if to_log:
                 for key, value in action_logs.items():
                     self.writer.add_scalar(key, value, global_step)
-

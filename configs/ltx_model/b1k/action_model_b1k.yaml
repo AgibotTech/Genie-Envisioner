@@ -1,22 +1,20 @@
-### resume path
-resume_from_path: /shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_13_22_43_45/step_100000
+# BEHAVIOR-1K Action Model Config for GE-ACT
+# Based on libero config, adapted for BEHAVIOR-1K's R1Pro robot
 
-### experiment name
 model_name: 'ltx_train'
 is_i2v: True
 report_to: None
 tracker_name: ltx_trainer
 
 logging_dir: logs
-output_dir: output
-pretrained_model_name_or_path: /shared_work/physical_intelligence/LTX-Video
+output_dir: outputs/b1k_action_model
+pretrained_model_name_or_path: /pm/physical_intelligence/LTX-Video
 
 ###
-train_data_class_path: data/libero_dataset.py
-train_data_class: CustomLeRobotDataset
-val_data_class_path: data/libero_dataset.py
-val_data_class: CustomLeRobotDataset
-
+train_data_class_path: data/b1k_dataset.py
+train_data_class: B1KDataset
+val_data_class_path: data/b1k_dataset.py
+val_data_class: B1KDataset
 
 ### 
 tokenizer_class_path: transformers
@@ -39,7 +37,7 @@ return_video: false
 train_mode: 'action_full'
 action_loss_scale: 1.0
 
-# total training step is decided by the minimum of the below two
+# training config
 train_steps: 1000000
 train_epochs: 10000
 steps_to_save: 10000
@@ -49,7 +47,6 @@ steps_to_val: 1000000000
 mixed_precision: bf16
 allow_tf32: False
 
-# timeout, seconds
 nccl_timeout: 600
 seed: 42
 
@@ -98,13 +95,12 @@ flow_logit_mean: 0.0
 flow_logit_std: 1.0
 flow_mode_scale: 1.29
 
-reinit_view_emb: False
-
 pixel_wise_timestep: True
 
+# Use GE-ACT Calvin weights for inference
+# NOTE: These weights are trained on Calvin, not BEHAVIOR-1K, but provide action prediction capability
 diffusion_model:
-  # model_path: /shared_work/physical_intelligence/ge_weights/GE_base_fast_v0.1.safetensors
-  model_path: /shared_work/physical_intelligence/sajjad/projects/Genie-Envisioner/output/2026_01_09_16_56_23/step_120000/diffusion_pytorch_model.safetensors
+  model_path: /pm/physical_intelligence/ge_weights/GE_base_fast_v0.1.safetensors
   config:
     activation_fn: gelu-approximate
     attention_bias: true
@@ -122,66 +118,76 @@ diffusion_model:
     patch_size_t: 1
     qk_norm: rms_norm_across_heads
     action_expert: true
-    action_in_channels: 22
-    action_out_channels: 22
+    # B1K uses 23 action dims + filtered proprioceptive state (23 dims)
+    # Proprioceptive features: base_qvel(3) + trunk_qpos(4) + left_arm(7) + left_gripper_width(1) + right_arm(7) + right_gripper_width(1)
+    # Gripper positions summed as EEF width values
+    # Total: 23 actions + 23 state dims = 46 channels
+    action_in_channels: 46
+    action_out_channels: 46
     action_num_attention_heads: 16
     action_attention_head_dim: 32
 
+
 data:
-### more details can be found in data/utils/*_dataset.py
   train:
-    data_roots: ["/shared_work/physical_intelligence/sajjad/.cache/huggingface/hub/datasets--fywang--calvin-task-ABCD-D-lerobot/snapshots/ab479911f329e14555a4988778b2514a897bbb82"]
-    domains: ["calvin", ]
-    sample_size: [256, 256]
-    sample_n_frames: 100
-    preprocess :  'resize'
-    valid_cam :  ['observation.images.top', 'observation.images.wrist']
-    chunk: 9
-    action_chunk: 54
-    n_previous: 4
-    previous_pick_mode: 'random'
-    random_crop: True
-    action_type: "absolute"
-    action_space: "eef"
-    stat_file: configs/ltx_model/calvin/stats_calvin_rel.json
-    # n_repeat: 5
-    state_key: observation.state
-    action_key: action
-    ignore_seek: True
-  val:
-    data_roots: ["/shared_work/physical_intelligence/sajjad/.cache/huggingface/hub/datasets--fywang--calvin-task-ABCD-D-lerobot/snapshots/ab479911f329e14555a4988778b2514a897bbb82"]
-    domains: ["calvin", ]
-    sample_size: [256, 256]
-    sample_n_frames: 100
-    preprocess :  'resize'
-    valid_cam :  ['observation.images.top', 'observation.images.wrist']
-    chunk: 9
-    action_chunk: 54
-    n_previous: 4
+    data_roots: ["/pm/physical_intelligence/2025-challenge-demos-debug"]
+    domains: ["behavior1k"]
+    sample_size: [256, 256]  # Match LIBERO/Calvin
+    sample_n_frames: 500
+    preprocess: 'resize'
+    # B1K RGB cameras (3 cameras like Calvin has 2)
+    valid_cam: ['observation.images.rgb.head', 'observation.images.rgb.left_wrist', 'observation.images.rgb.right_wrist']
+    chunk: 9  # Match LIBERO/Calvin
+    action_chunk: 36  # Match LIBERO
+    n_previous: 4  # Match LIBERO/Calvin
     previous_pick_mode: 'random'
     random_crop: False
+    ignore_seek: True
     action_type: "absolute"
-    action_space: "eef"
-    stat_file: configs/ltx_model/calvin/stats_calvin_rel.json
+    action_space: "joint"
+    stat_file: configs/ltx_model/b1k/behavior1k_stats.json
     state_key: observation.state
     action_key: action
+    dataset_info_cache_path: "cache/b1k_action_train_cache.json"
+    # Optional: filter to specific tasks
+    # task_ids: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  val:
+    data_roots: ["/pm/physical_intelligence/2025-challenge-demos-debug"]
+    domains: ["behavior1k"]
+    sample_size: [256, 256]  # Match LIBERO/Calvin
+    sample_n_frames: 500
+    preprocess: 'resize'
+    valid_cam: ['observation.images.rgb.head', 'observation.images.rgb.left_wrist', 'observation.images.rgb.right_wrist']
+    chunk: 9  # Match LIBERO/Calvin
+    action_chunk: 36  # Match LIBERO
+    n_previous: 4  # Match LIBERO/Calvin
+    previous_pick_mode: 'random'
+    random_crop: False
     ignore_seek: True
+    action_type: "absolute"
+    action_space: "joint"
+    stat_file: configs/ltx_model/b1k/behavior1k_stats.json
+    state_key: observation.state
+    action_key: action
+    dataset_info_cache_path: "cache/b1k_action_val_cache.json"
+    # task_ids: [40, 41, 42, 43, 44]
 
+
+# Inference config
+threshold: 200
+num_inference_steps: 5
 
 use_color_jitter: true
 num_inference_step: 10
 noisy_video: true
 
-# false for quick debug, for training set True
 load_weights: true
 
-# deepspeed config
+# deepspeed config (for training)
 use_deepspeed: true
 deepspeed:
   zero_optimization:
     stage: 2
-    # offload_optimizer:
-    #   device: cpu
   fp16:
     enabled: false
   bf16:

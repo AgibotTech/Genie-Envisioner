@@ -4,14 +4,14 @@ report_to: None
 tracker_name: ltx_trainer
 
 logging_dir: logs
-output_dir: output
-pretrained_model_name_or_path: /shared_work/physical_intelligence/LTX-Video
+output_dir: outputs/b1k_video_adaptation
+pretrained_model_name_or_path: /pm/physical_intelligence/LTX-Video
 
 ###
-train_data_class_path: data/libero_dataset.py
-train_data_class: CustomLeRobotDataset
-val_data_class_path: data/libero_dataset.py
-val_data_class: CustomLeRobotDataset
+train_data_class_path: data/b1k_dataset.py
+train_data_class: B1KDataset
+val_data_class_path: data/b1k_dataset.py
+val_data_class: B1KDataset
 
 ### 
 tokenizer_class_path: transformers
@@ -28,13 +28,13 @@ diffusion_scheduler_class: FlowMatchEulerDiscreteScheduler
 pipeline_class_path: models/pipeline/custom_pipeline.py
 pipeline_class: CustomPipeline
 
-# 
+# Video-only mode for visual domain adaptation
 return_action: false
 return_video: true
 train_mode: 'video_only'
 action_loss_scale: 1.0
 
-# total training step is decided by the minimum of the below two
+# Training config
 train_steps: 1000000
 train_epochs: 10000
 steps_to_save: 10000
@@ -48,15 +48,14 @@ allow_tf32: False
 nccl_timeout: 600
 seed: 42
 
-# vae
+# VAE
 enable_slicing: True
 enable_tiling: True
 
 add_state: False
-
 caption_dropout_p: 0.06
 
-# dataloader
+# Dataloader
 batch_size: 16
 dataloader_num_workers: 8
 pin_memory: True
@@ -79,12 +78,11 @@ scale_lr: False
 max_grad_norm: 1.0
 gradient_accumulation_steps: 1
 
-# lr_scheduler Config
+# LR Scheduler Config
 lr_scheduler: constant_with_warmup
 lr_warmup_steps: 1000
 lr_num_cycles: 1
 lr_power: 1.0
-
 
 # Timestep Config
 flow_weighting_scheme: none
@@ -93,6 +91,7 @@ flow_logit_std: 1.0
 flow_mode_scale: 1.29
 
 pixel_wise_timestep: True
+
 
 diffusion_model:
   model_path: /pm/physical_intelligence/ge_weights/GE_base_fast_v0.1.safetensors
@@ -116,58 +115,61 @@ diffusion_model:
 
 data:
   train:
-    data_roots: ["/shared_work/physical_intelligence/sajjad/.cache/huggingface/hub/datasets--physical-intelligence--libero/snapshots/a4336d589d589045d1c56423ffdf3b88a0e19b1f"]
-    domains: ["libero"]
+    data_roots: ["/pm/physical_intelligence/2025-challenge-demos-debug"]
+    domains: ["behavior1k"]
     sample_size: [256, 256]
     sample_n_frames: 500
-    preprocess :  'resize'
-    valid_cam :  ['image', 'wrist_image']
+    preprocess: 'resize'
+    # B1K RGB cameras
+    valid_cam: ['observation.images.rgb.head', 'observation.images.rgb.left_wrist', 'observation.images.rgb.right_wrist']
     chunk: 9
     action_chunk: 36
     n_previous: 4
     previous_pick_mode: 'random'
     random_crop: False
     ignore_seek: False
+    dataset_info_cache_path: "cache/b1k_train_cache.json"
     action_type: "absolute"
-    action_space: "eef"
-    stat_file: configs/ltx_model/libero/libero_all.json
-    state_key: state
-    action_key: actions
-    extra_parquet_index: False
+    action_space: "joint"
+    stat_file: configs/ltx_model/b1k/behavior1k_stats.json
+    state_key: observation.state
+    action_key: action
+    # extra_parquet_index: False
+    # Optional: filter to specific tasks (comment out to use all 50 tasks)
+    # task_ids: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
   val:
-    data_roots: ["/shared_work/physical_intelligence/sajjad/.cache/huggingface/hub/datasets--physical-intelligence--libero/snapshots/a4336d589d589045d1c56423ffdf3b88a0e19b1f"]
-    domains: ["libero"]
+    data_roots: ["/pm/physical_intelligence/2025-challenge-demos-debug"]
+    domains: ["behavior1k"]
     sample_size: [256, 256]
     sample_n_frames: 500
-    preprocess :  'resize'
-    valid_cam : ['image', 'wrist_image']
+    preprocess: 'resize'
+    valid_cam: ['observation.images.rgb.head', 'observation.images.rgb.left_wrist', 'observation.images.rgb.right_wrist']
     chunk: 9
     action_chunk: 36
     n_previous: 4
     previous_pick_mode: 'random'
     random_crop: False
     ignore_seek: False
+    dataset_info_cache_path: "cache/b1k_val_cache.json"
     action_type: "absolute"
-    action_space: "eef"
-    stat_file: configs/ltx_model/libero/libero_all.json
-    state_key: state
-    action_key: actions
-    extra_parquet_index: False
+    action_space: "joint"
+    stat_file: configs/ltx_model/b1k/behavior1k_stats.json
+    state_key: observation.state
+    action_key: action
+    # extra_parquet_index: False
+    # task_ids: [40, 41, 42, 43, 44]
 
 use_color_jitter: true
 num_inference_step: 10
 noisy_video: false
 
-# false for quick debug, for training set True
 load_weights: true
 
-# deepspeed config
+# DeepSpeed config
 use_deepspeed: true
 deepspeed:
   zero_optimization:
     stage: 2
-    # offload_optimizer:
-    #   device: cpu
   fp16:
     enabled: false
   bf16:
